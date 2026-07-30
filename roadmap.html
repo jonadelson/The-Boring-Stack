@@ -90,6 +90,26 @@
           SQL playground) as a worked example of framework-where-it-counts</li>
       </ul>
 
+      <h3>The application-architecture arc</h3>
+      <p>
+        A three-lesson elective on the skills rich client apps demand —
+        framework-agnostic on purpose, and best taken after phase 3, because
+        its central claim needs schema-design experience to land:
+        <em>client state design and database schema design are the same
+        discipline.</em>
+      </p>
+      <ul>
+        <li><strong>State design</strong> — essential versus derived state,
+          one source of truth per fact, normalize-don't-duplicate: the schema
+          lessons replayed in the browser</li>
+        <li><strong>Component boundaries</strong> — components as functions:
+          data in, events out; where to split, what to colocate, and why
+          most component-design pain is interface-design pain</li>
+        <li><strong>Server state versus UI state</strong> — why treating a
+          server cache as client state is the root of most SPA bugs, and
+          what the popular data-fetching libraries actually solved</li>
+      </ul>
+
       <aside class="callout">
         <p><strong>The three rules:</strong> no layer is added until its
         absence hurts. Something ships every week. And the site eats its own
