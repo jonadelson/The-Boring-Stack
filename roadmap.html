@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Roadmap — The Boring Stack</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <article>
+    <header class="site-header">
+      <h1>The Full Roadmap</h1>
+      <p class="lesson-meta">the curriculum and the app, which are the same thing</p>
+    </header>
+
+    <main>
+      <p>
+        This site grows in phases, and each phase begins only when the current
+        stack genuinely hurts. That's not project management — it's the
+        pedagogy. Every technology arrives with its justification attached,
+        because you'll have felt life without it first.
+      </p>
+
+      <h2>Phase 1 — Static site <em>(current)</em></h2>
+      <p><strong>The app:</strong> hand-written HTML and CSS on GitHub Pages.
+        No build step, no JavaScript.</p>
+      <p><strong>Lessons:</strong> why boring ✓ · semantic HTML ✓ ·
+        CSS without a framework ✓ · when do you actually need React? ✓ ·
+        HTTP: what happens when you tap a link · forms, the most underrated
+        element · URLs as design · images and media · accessibility
+        fundamentals</p>
+
+      <h2>Phase 2 — JavaScript sprinkles</h2>
+      <p><strong>The pain that triggers it:</strong> the quizzes forget every
+        answer the moment you leave the page.</p>
+      <p><strong>The app:</strong> quizzes that remember your answers, a
+        review queue, a streak — vanilla JavaScript and localStorage, added
+        as progressive enhancement so every page still works without it.</p>
+      <p><strong>Lessons:</strong> the DOM and events · JavaScript the
+        language (the parts that matter without a framework) · localStorage ·
+        progressive enhancement as a discipline · implementing spaced
+        repetition (SM-2 in ~30 lines)</p>
+
+      <h2>Phase 3 — A server and Postgres</h2>
+      <p><strong>The pain:</strong> progress doesn't sync between phone and
+        laptop, because localStorage lives in one browser.</p>
+      <p><strong>The app:</strong> a small Node server, server-rendered
+        pages, progress in Postgres. Deployed <em>early</em> in the phase,
+        not at the end — running code beats perfect code.</p>
+      <p><strong>Lessons:</strong> writing an HTTP server with (almost) no
+        framework · SQL from zero to JOINs · schema design: cards, reviews,
+        intervals · migrations · transactions and constraints · indexes and
+        reading EXPLAIN · server-side templating</p>
+
+      <h2>Phase 4 — Authentication and security</h2>
+      <p><strong>The pain:</strong> the server is on the public internet and
+        progress needs to belong to <em>you</em>.</p>
+      <p><strong>The app:</strong> accounts, login, per-user data, password
+        reset. Security learned by building it, not reading about it.</p>
+      <p><strong>Lessons:</strong> cookies and sessions · password hashing
+        (and why not SHA-256) · SQL injection · XSS and escaping · CSRF ·
+        security headers · rate limiting · email delivery (a gloriously
+        boring technology of its own)</p>
+
+      <h2>Phase 5 — Operations</h2>
+      <p><strong>The pain:</strong> it's a real app now, and you're
+        responsible for it at 3am.</p>
+      <p><strong>Lessons:</strong> a VPS and systemd · DNS for real · TLS and
+        Let's Encrypt · nginx as reverse proxy · logs: what to write, how to
+        read · backups and restore drills (an untested backup is a wish) ·
+        cron · measuring performance before optimizing</p>
+
+      <h2>Phase 6 — Electives</h2>
+      <p>
+        Once the platform exists, each of these is a self-contained
+        lesson-plus-feature:
+      </p>
+      <ul>
+        <li>SQLite — when it beats Postgres</li>
+        <li>htmx and HTML over the wire — climbing rung 3 of the ladder on
+          purpose</li>
+        <li>HTTP caching and CDNs</li>
+        <li>Full-text search in Postgres — before reaching for
+          Elasticsearch</li>
+        <li>Job queues in Postgres with <code>SKIP LOCKED</code> — before
+          reaching for Redis</li>
+        <li>WebSockets versus server-sent events</li>
+        <li>Testing the boring way</li>
+        <li>One deliberate island: a rich client-side widget (an interactive
+          SQL playground) as a worked example of framework-where-it-counts</li>
+      </ul>
+
+      <aside class="callout">
+        <p><strong>The three rules:</strong> no layer is added until its
+        absence hurts. Something ships every week. And the site eats its own
+        cooking — by phase 3, the spaced-repetition engine will be quizzing
+        its builder on the SQL that powers the spaced-repetition engine.</p>
+      </aside>
+    </main>
+
+    <nav class="lesson-nav">
+      <a href="index.html">← Home</a>
+      <a href="lessons/01-why-boring.html">Start lesson 1 →</a>
+    </nav>
+  </article>
+</body>
+</html>

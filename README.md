@@ -28,6 +28,11 @@ lesson about what that layer buys.
 4. **Authentication** — sessions, password hashing, CSRF; security learned
    by building it.
 5. **Operations** — deployment, TLS, logs, backups.
+6. **Electives** — SQLite, htmx, caching, full-text search, job queues,
+   and one deliberate framework "island."
+
+The lesson-by-lesson version lives on the site itself:
+[roadmap.html](https://jonadelson.github.io/The-Boring-Stack/roadmap.html).
 
 ## Conventions
 
