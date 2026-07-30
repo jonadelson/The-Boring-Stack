@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>When Do You Actually Need React? — The Boring Stack</title>
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+  <article>
+    <header class="site-header">
+      <h1>When Do You Actually Need React?</h1>
+      <p class="lesson-meta">Lesson 4 · architecture · ~7 min</p>
+    </header>
+
+    <main>
+      <p>
+        The boring stack is not anti-JavaScript, and it is not anti-React.
+        It's anti-<em>default</em>. React is a genuinely great tool that has
+        become the reflexive starting point for every website, including the
+        large majority that don't need it. The skill this lesson teaches is
+        telling the difference — and the vocabulary for it is a ladder.
+      </p>
+
+      <h2>The interactivity ladder</h2>
+      <p>
+        Interactivity isn't a yes/no question. It's an escalation, and each
+        rung costs more than the one below — in tooling, in payload, in
+        failure modes, in things you must now do yourself (routing, focus
+        management, browser history) that the platform did for free.
+      </p>
+      <ol>
+        <li>
+          <strong>HTML and CSS alone.</strong> More interactive than its
+          reputation: <code>&lt;details&gt;</code> disclosure,
+          <code>&lt;dialog&gt;</code> modals, form validation, CSS
+          transitions, hover and focus states, scroll snapping. This site is
+          currently on this rung — including its quizzes.
+        </li>
+        <li>
+          <strong>JavaScript sprinkles.</strong> Server-rendered pages plus
+          small scripts for specific behaviors: remember a preference, filter
+          a list, enhance a form. The page works without them; the script
+          makes it nicer. This is "progressive enhancement," and it powered
+          most of the useful web for fifteen years.
+        </li>
+        <li>
+          <strong>HTML over the wire.</strong> Tools like htmx or Turbo: user
+          actions fetch fragments of server-rendered HTML and swap them into
+          the page. You get SPA-feeling updates while the server remains the
+          single source of truth — no client-side state to synchronize. A
+          large share of "we need React for this" apps live comfortably
+          here.
+        </li>
+        <li>
+          <strong>Islands.</strong> A mostly-boring page with one genuinely
+          rich component embedded in it — a chart, an editor, a map. Use a
+          framework <em>inside the island</em> if it earns its keep; the rest
+          of the page stays on the lower rungs.
+        </li>
+        <li>
+          <strong>Full client-side application.</strong> The framework owns
+          the page: state, routing, rendering. Sometimes this is exactly
+          right — see below.
+        </li>
+      </ol>
+
+      <aside class="callout">
+        <p><strong>The boring truth:</strong> the ladder is climbed per
+        <em>problem</em>, not per project. A site can be rung 1 almost
+        everywhere, rung 2 in a few places, and rung 4 on the one screen that
+        needs it. The mistake is starting every project on rung 5 because
+        that's where the tooling defaults are.</p>
+      </aside>
+
+      <h2>Documents versus tools</h2>
+      <p>
+        The most useful heuristic for picking a rung: is this screen a
+        <em>document</em> or a <em>tool</em>?
+      </p>
+      <p>
+        A <strong>document</strong> is content you read and forms you submit:
+        articles, product pages, dashboards, admin panels, checkout flows,
+        settings screens. State lives on the server; the page is a view of
+        it. Documents belong on rungs 1–3, and browsers are spectacularly
+        good at them — instant back button, working links, free
+        accessibility, no loading spinners for content that's just text.
+      </p>
+      <p>
+        A <strong>tool</strong> is continuous manipulation of live state:
+        Figma, Google Sheets, a video editor, a multiplayer game, a
+        collaborative whiteboard. Feedback loops are measured in
+        milliseconds, state changes dozens of times between server round
+        trips, and the interaction <em>is</em> the product. Tools genuinely
+        need rungs 4–5, and React (or something like it) is the right call —
+        hand-managing that much DOM state without a framework is how
+        frameworks got invented.
+      </p>
+      <p>
+        The uncomfortable observation: most React apps in production are
+        documents wearing a tool's architecture. A settings page with four
+        forms doesn't need client-side state management — it needs
+        <code>&lt;form&gt;</code>. The test is not "does it have
+        interactivity?" (everything does) but "does the interactivity outrun
+        what the lower rungs provide?"
+      </p>
+
+      <h2>Why learning the boring rungs makes you better at React</h2>
+      <p>
+        React is a layer over the platform: components render to the DOM,
+        events are DOM events, effects wrap the same lifecycle the browser
+        exposes, and every fetch is still HTTP with the same caching,
+        cookies, and failure modes. Developers who only know the framework
+        struggle precisely where the abstraction leaks — focus management,
+        scroll restoration, why the back button broke, why the form doesn't
+        submit on Enter. Learning the platform underneath isn't a detour
+        from React skills; it's where the hard React bugs get solved.
+      </p>
+
+      <h2>What this site will do about it</h2>
+      <p>
+        This site will climb the ladder rung by rung, on camera. It's on
+        rung 1 now. Phase 2 adds rung-2 sprinkles (quizzes that remember
+        your answers). Later phases will hit real problems — syncing state,
+        richer widgets — and each time, the lesson will be whether the next
+        rung is earned or whether the current one still holds.
+      </p>
+
+      <section class="quiz">
+        <h2>Check yourself</h2>
+        <details>
+          <summary>What's the "documents versus tools" test?</summary>
+          <p>Ask whether the screen is content-and-forms with server-owned
+          state (a document — rungs 1–3) or continuous manipulation of live
+          state where the interaction is the product (a tool — rungs 4–5,
+          where frameworks earn their cost).</p>
+        </details>
+        <details>
+          <summary>Your app needs one rich, stateful chart on an otherwise
+            ordinary page. Which rung?</summary>
+          <p>Rung 4 — an island. The chart can use whatever richness it
+          needs while the rest of the page stays server-rendered HTML.</p>
+        </details>
+        <details>
+          <summary>Name two things the browser does for free on rungs 1–3
+            that a full SPA must reimplement.</summary>
+          <p>Any two of: working back/forward history, link behavior,
+          scroll restoration, focus management, form submission and
+          validation, "loading" states (the browser's own progress
+          indicator), accessibility semantics.</p>
+        </details>
+      </section>
+    </main>
+
+    <nav class="lesson-nav">
+      <a href="03-css.html">← CSS</a>
+      <a href="../index.html">Home →</a>
+    </nav>
+  </article>
+</body>
+</html>
