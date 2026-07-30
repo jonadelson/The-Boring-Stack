@@ -1,0 +1,181 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>HTTP: What Happens When You Tap a Link — The Boring Stack</title>
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+  <article>
+    <header class="site-header">
+      <h1>HTTP: What Happens When You Tap a Link</h1>
+      <p class="lesson-meta">Lesson 5 · http · ~8 min</p>
+    </header>
+
+    <main>
+      <p>
+        Every framework, every API, every "full-stack" anything is a wrapper
+        around the same conversation: a client sends a request, a server
+        sends a response, and the connection forgets everything. That
+        conversation is HTTP, it's made of readable text, and once you can
+        picture it, half the mysteries of web development dissolve. Here's
+        the whole journey, from tap to page.
+      </p>
+
+      <h2>1. The URL gets taken apart</h2>
+<pre><code>https://jonadelson.github.io/The-Boring-Stack/roadmap.html
+└─┬─┘   └────────┬────────┘ └───────────┬──────────────┘
+scheme        host                    path</code></pre>
+      <p>
+        The <strong>scheme</strong> says how to talk (encrypted HTTP). The
+        <strong>host</strong> says who to talk to. The <strong>path</strong>
+        says what to ask them for. That's the whole anatomy — everything
+        else (ports, query strings, fragments) is elaboration.
+      </p>
+
+      <h2>2. DNS turns the name into an address</h2>
+      <p>
+        Computers route by IP address, not by name, so the browser asks the
+        Domain Name System: "who is <code>jonadelson.github.io</code>?" and
+        gets back something like <code>185.199.108.153</code>. DNS is a
+        distributed, cached, forty-year-old phone book — and one of the
+        purest boring technologies alive. It gets its own lesson in
+        phase 5, when you'll point a domain at your own server.
+      </p>
+
+      <h2>3. A connection opens, then gets encrypted</h2>
+      <p>
+        The browser opens a TCP connection to that address, then performs a
+        TLS handshake: the server proves its identity with a certificate,
+        and the two sides agree on encryption keys. Everything after this
+        point is unreadable to anyone in between. That padlock is the
+        entire meaning of the <em>S</em> in HTTPS — same HTTP, wrapped in
+        TLS.
+      </p>
+
+      <h2>4. The request: four lines of text</h2>
+      <p>Here's what the browser actually sends. This is not pseudocode —
+        this is the real protocol:</p>
+<pre><code>GET /The-Boring-Stack/roadmap.html HTTP/1.1
+Host: jonadelson.github.io
+Accept: text/html
+Accept-Encoding: gzip</code></pre>
+      <p>
+        A <strong>method</strong> (<code>GET</code>: give me this;
+        <code>POST</code>: here's data, do something with it), a
+        <strong>path</strong>, and some <strong>headers</strong> — key-value
+        metadata about the request. That's all a request is.
+      </p>
+
+      <h2>5. The response: status, headers, body</h2>
+<pre><code>HTTP/1.1 200 OK
+Content-Type: text/html; charset=utf-8
+Cache-Control: max-age=600
+Content-Length: 6142
+
+&lt;!doctype html&gt;
+&lt;html lang="en"&gt;
+...</code></pre>
+      <p>
+        A <strong>status code</strong>, response <strong>headers</strong>,
+        a blank line, then the <strong>body</strong> — the actual HTML. The
+        status codes group by first digit, and knowing one or two per family
+        covers daily life:
+      </p>
+      <ul>
+        <li><strong>2xx — success.</strong> <code>200 OK</code>.</li>
+        <li><strong>3xx — go elsewhere.</strong> <code>301</code> moved
+          permanently, <code>302</code> moved temporarily,
+          <code>304</code> "your cached copy is still good."</li>
+        <li><strong>4xx — you messed up.</strong> <code>404</code> not
+          found, <code>403</code> forbidden, <code>400</code> bad
+          request.</li>
+        <li><strong>5xx — we messed up.</strong> <code>500</code> server
+          error, <code>503</code> temporarily overloaded.</li>
+      </ul>
+
+      <aside class="callout">
+        <p><strong>The boring truth:</strong> HTTP is plain text you can
+        speak by hand. Run
+        <code>curl&nbsp;-i&nbsp;https://jonadelson.github.io/The-Boring-Stack/roadmap.html</code>
+        in a terminal and you'll see this site's real status line and
+        headers. Or open your browser's developer tools, pick the Network
+        tab, and reload this page — every request listed, every header
+        inspectable. The entire web is debuggable with tools you already
+        have.</p>
+      </aside>
+
+      <h2>6. Amnesia, by design</h2>
+      <p>
+        Here's the property that shapes everything to come: HTTP is
+        <strong>stateless</strong>. When the response is sent, the server
+        forgets you. The next request starts from zero — no memory of who
+        you are or what you did. Statelessness is why the web scales (any
+        server can answer any request), but it raises an obvious question:
+        how does a site keep you logged in?
+      </p>
+      <p>
+        The answer is a header. The server says
+        <code>Set-Cookie: session=abc123</code>, and the browser dutifully
+        attaches <code>Cookie: session=abc123</code> to every later request
+        to that site — a name tag the server reads to "remember" you, one
+        request at a time. That little mechanism carries the entire weight
+        of login on the web, and building it properly — what goes in the
+        cookie, how it's protected, how it's stolen — is most of phase 4.
+      </p>
+
+      <h2>Why this matters for everything ahead</h2>
+      <p>
+        The phase 3 server we'll write is a program that reads text like
+        step 4 and writes text like step 5 — nothing more. Caching is a
+        conversation in headers (<code>Cache-Control</code>,
+        <code>304</code>). Security headers are just more response headers.
+        Sessions are cookies. When a framework misbehaves, the ground truth
+        is always in the Network tab, because whatever the abstraction,
+        <em>this</em> is what's actually happening.
+      </p>
+
+      <section class="quiz">
+        <h2>Check yourself</h2>
+        <details>
+          <summary>What does it mean that HTTP is stateless, and what
+            mechanism compensates?</summary>
+          <p>The server forgets each client after every response; no memory
+          carries between requests. Cookies compensate: the server sets one
+          with <code>Set-Cookie</code>, and the browser sends it back on
+          every later request, letting the server recognize you
+          request by request.</p>
+        </details>
+        <details>
+          <summary>A response comes back <code>404</code>. Whose fault is
+            it, roughly — and what about <code>503</code>?</summary>
+          <p><code>4xx</code> means the request was the problem (404: asked
+          for something that isn't there). <code>5xx</code> means the
+          server was the problem (503: it's overloaded or down for
+          maintenance).</p>
+        </details>
+        <details>
+          <summary>What's the difference between HTTP and HTTPS?</summary>
+          <p>Nothing about the protocol itself — HTTPS is the same
+          text-based HTTP conversation carried inside a TLS-encrypted
+          connection, after the server proves its identity with a
+          certificate.</p>
+        </details>
+        <details>
+          <summary>Where do you look when you want to see the actual
+            requests a page makes?</summary>
+          <p>The browser developer tools' Network tab — or
+          <code>curl -i</code> from a terminal for a single request with
+          its status line and headers.</p>
+        </details>
+      </section>
+    </main>
+
+    <nav class="lesson-nav">
+      <a href="04-when-react.html">← When React?</a>
+      <a href="../index.html">Home →</a>
+    </nav>
+  </article>
+</body>
+</html>
