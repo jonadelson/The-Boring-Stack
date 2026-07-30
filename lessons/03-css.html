@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>CSS Without a Framework — The Boring Stack</title>
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+  <article>
+    <header class="site-header">
+      <h1>CSS Without a Framework</h1>
+      <p class="lesson-meta">Lesson 3 · css · ~6 min</p>
+    </header>
+
+    <main>
+      <p>
+        CSS has a reputation as the part of the stack you fight until you give
+        up and install a framework. That reputation was earned around 2010 and
+        has been obsolete for years. Modern CSS — variables, flexbox, grid,
+        media queries — solved most of what the frameworks were invented to
+        paper over. This site's entire design is
+        <a href="../css/style.css">one stylesheet</a>, written to be read.
+        Open it alongside this lesson; it's the worked example.
+      </p>
+
+      <h2>Mobile-first is a way of thinking, not a buzzword</h2>
+      <p>
+        Write your plain CSS rules for the smallest screen. Then, inside
+        <code>@media (min-width: ...)</code> blocks, add the few adjustments
+        larger screens need. This site's stylesheet has exactly one such
+        block, and it changes two things: padding and font size.
+      </p>
+      <p>
+        The direction matters. A phone layout is usually the simple one — a
+        single column, content in order. Start there and you <em>add</em>
+        complexity for big screens. Start desktop-first and you're
+        <em>undoing</em> complexity on small screens, which is where most
+        broken mobile sites come from.
+      </p>
+
+      <aside class="callout">
+        <p><strong>The boring truth:</strong> the single highest-impact line
+        of mobile CSS isn't CSS. It's the viewport meta tag in the HTML head:
+        <code>&lt;meta name="viewport" content="width=device-width,
+        initial-scale=1"&gt;</code>. Without it, phones render your page 980px
+        wide and zoom out, and nothing else you do matters.</p>
+      </aside>
+
+      <h2>Custom properties: theming without tooling</h2>
+      <p>
+        CSS variables (officially "custom properties") are the built-in
+        replacement for what once required a preprocessor. Define values on
+        <code>:root</code>, use them anywhere:
+      </p>
+<pre><code>:root {
+  --accent: #0b5d8a;
+}
+
+a {
+  color: var(--accent);
+}</code></pre>
+      <p>
+        Because they're live values, not compile-time substitutions, you can
+        redefine them inside a media query — which is exactly how this site's
+        dark mode works. One block redefines the color variables when the
+        device prefers dark, and every rule that uses them follows
+        automatically:
+      </p>
+<pre><code>@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #16191d;
+    --text: #e6e9ec;
+  }
+}</code></pre>
+      <p>
+        If your phone is in dark mode, you're looking at the result right now.
+        Total cost: one media query. No toggle button, no JavaScript, no
+        theme framework — the operating system already knows the user's
+        preference, and CSS can simply ask.
+      </p>
+
+      <h2>Three defaults that make text readable</h2>
+      <p>Most of "good design" on a content site is typography, and most of
+        typography is three decisions:</p>
+      <ul>
+        <li><strong>Line length:</strong> <code>max-width: 65ch</code> on the
+          body. The <code>ch</code> unit is the width of a character, so this
+          caps lines at roughly 65 characters — the comfortable reading
+          range.</li>
+        <li><strong>Line height:</strong> around <code>1.5</code>–<code>1.6</code>
+          for body text. The browser default (about 1.2) is too tight for
+          paragraphs.</li>
+        <li><strong>Font:</strong> you don't need a webfont. The system font
+          stack (<code>system-ui</code> and friends) costs zero bytes and
+          looks native everywhere. This site pairs it with Georgia — a serif
+          that has shipped with every device since the nineties — for body
+          text.</li>
+      </ul>
+
+      <h2>When you actually need layout</h2>
+      <p>
+        Flexbox handles one-dimensional arrangement — a row or a column. The
+        previous/next links at the bottom of this page are a flexbox with
+        <code>justify-content: space-between</code>, which pushes them to
+        opposite edges: a layout task that once required float hacks, solved
+        in two lines. Grid handles two-dimensional layout; this site doesn't
+        need it yet, which is itself a boring-stack lesson — don't reach for
+        the more powerful tool before the problem shows up.
+      </p>
+
+      <section class="quiz">
+        <h2>Check yourself</h2>
+        <details>
+          <summary>What does "mobile-first" mean mechanically, in the
+            stylesheet?</summary>
+          <p>Plain (unqualified) rules describe the small-screen layout, and
+          <code>@media (min-width: ...)</code> blocks add adjustments for
+          larger screens — so complexity is added as screens grow, never
+          undone as they shrink.</p>
+        </details>
+        <details>
+          <summary>How does this site support dark mode with no JavaScript?</summary>
+          <p>Colors are defined once as custom properties on
+          <code>:root</code>, and a <code>prefers-color-scheme: dark</code>
+          media query redefines them. Every rule using
+          <code>var(--...)</code> updates automatically.</p>
+        </details>
+        <details>
+          <summary>Why <code>max-width: 65ch</code> instead of a pixel value?</summary>
+          <p>The <code>ch</code> unit is based on character width, so the
+          limit tracks what actually matters for readability — characters per
+          line — and stays correct if the font or its size changes.</p>
+        </details>
+      </section>
+    </main>
+
+    <nav class="lesson-nav">
+      <a href="02-html.html">← HTML</a>
+      <a href="../index.html">Home →</a>
+    </nav>
+  </article>
+</body>
+</html>

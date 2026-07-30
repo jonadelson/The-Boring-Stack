@@ -1,0 +1,204 @@
+/* The Boring Stack — one stylesheet for the whole site.
+ *
+ * This file is also a lesson. It is written mobile-first: the plain rules
+ * below describe the phone layout, and the few @media blocks at the end
+ * add adjustments for larger screens. Read it top to bottom.
+ */
+
+/* ---------------------------------------------------------------------------
+ * 1. Design tokens.
+ * Custom properties ("CSS variables") defined on :root are visible
+ * everywhere. Change a color here and the whole site follows — this is the
+ * boring, built-in alternative to a theming framework.
+ * ------------------------------------------------------------------------- */
+:root {
+  --bg: #faf9f6;
+  --text: #1f2328;
+  --muted: #59636e;
+  --accent: #0b5d8a;
+  --surface: #eef1f4;
+  --border: #d1d9e0;
+  --code-bg: #eef1f4;
+
+  /* Tells the browser this site supports both color schemes, so built-in UI
+   * (form controls, scrollbars) matches. The dark values live in the
+   * prefers-color-scheme block below. */
+  color-scheme: light dark;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #16191d;
+    --text: #e6e9ec;
+    --muted: #9aa4ae;
+    --accent: #6cb6e0;
+    --surface: #21262c;
+    --border: #343b43;
+    --code-bg: #21262c;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+ * 2. Base document.
+ * ------------------------------------------------------------------------- */
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0 auto;
+  padding: 1rem;
+  /* 65ch caps line length around 65 characters — long lines are the #1
+   * readability mistake on wide screens. On a phone this never kicks in. */
+  max-width: 65ch;
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: 1.0625rem;
+  line-height: 1.6;
+  background: var(--bg);
+  color: var(--text);
+}
+
+h1, h2, h3 {
+  /* The "system font stack": whatever UI font the device already has.
+   * Zero bytes downloaded, always looks native. */
+  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  line-height: 1.25;
+}
+
+h1 { font-size: 1.75rem; }
+h2 { font-size: 1.3rem; margin-top: 2.5rem; }
+
+a {
+  color: var(--accent);
+}
+
+code {
+  font-family: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+  font-size: 0.9em;
+  background: var(--code-bg);
+  padding: 0.1em 0.35em;
+  border-radius: 4px;
+}
+
+pre {
+  background: var(--code-bg);
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  overflow-x: auto; /* wide code scrolls inside the box, not the page */
+}
+
+pre code {
+  background: none;
+  padding: 0;
+}
+
+/* ---------------------------------------------------------------------------
+ * 3. Site furniture: header, footer, lesson list.
+ * ------------------------------------------------------------------------- */
+.site-header {
+  margin-block: 1rem 2rem;
+}
+
+.site-header h1 {
+  margin-bottom: 0.25rem;
+}
+
+.tagline {
+  color: var(--muted);
+  font-style: italic;
+  margin-top: 0;
+}
+
+.lesson-list {
+  padding-left: 1.5rem;
+}
+
+.lesson-list li {
+  margin-block: 0.75rem;
+}
+
+.lesson-topic {
+  font-family: system-ui, sans-serif;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--muted);
+  margin-left: 0.5em;
+}
+
+.site-footer {
+  margin-top: 3rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--border);
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+/* ---------------------------------------------------------------------------
+ * 4. Lesson components.
+ * ------------------------------------------------------------------------- */
+.lesson-meta {
+  color: var(--muted);
+  font-size: 0.9rem;
+  font-family: system-ui, sans-serif;
+}
+
+/* Callout boxes, marked up as <aside class="callout"> — content that stands
+ * apart from the main flow, which is exactly what <aside> means. */
+.callout {
+  background: var(--surface);
+  border-left: 4px solid var(--accent);
+  border-radius: 0 8px 8px 0;
+  padding: 0.75rem 1rem;
+  margin-block: 1.5rem;
+}
+
+.callout > :first-child { margin-top: 0; }
+.callout > :last-child { margin-bottom: 0; }
+
+/* Check-yourself quizzes are <details>/<summary>: native tap-to-reveal with
+ * zero JavaScript. The browser handles the toggling, keyboard access, and
+ * state. */
+.quiz details {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 0.75rem 1rem;
+  margin-block: 0.75rem;
+}
+
+.quiz summary {
+  cursor: pointer;
+  font-weight: 600;
+  font-family: system-ui, sans-serif;
+}
+
+.quiz details[open] summary {
+  margin-bottom: 0.5rem;
+}
+
+/* Previous/next links at the bottom of each lesson. Flexbox with
+ * justify-content: space-between pushes the two links to opposite edges. */
+.lesson-nav {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-top: 3rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--border);
+  font-family: system-ui, sans-serif;
+}
+
+/* ---------------------------------------------------------------------------
+ * 5. Larger screens.
+ * Everything above assumed a phone. These few overrides are all a bigger
+ * screen needs — that's the payoff of mobile-first.
+ * ------------------------------------------------------------------------- */
+@media (min-width: 40rem) {
+  body {
+    padding: 2rem 1.5rem;
+    font-size: 1.125rem;
+  }
+
+  h1 { font-size: 2.25rem; }
+}

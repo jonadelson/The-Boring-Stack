@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Why Boring? — The Boring Stack</title>
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+  <article>
+    <header class="site-header">
+      <h1>Why Boring?</h1>
+      <p class="lesson-meta">Lesson 1 · philosophy · ~4 min</p>
+    </header>
+
+    <main>
+      <p>
+        In 2015 Dan McKinley wrote an essay called
+        <a href="https://mcfunley.com/choose-boring-technology">"Choose Boring
+        Technology"</a> that gave a name to something experienced engineers had
+        long felt: the exciting new tool is usually the wrong choice, and the
+        old, dull, battle-tested one is usually right.
+      </p>
+
+      <p>His core idea is <strong>innovation tokens</strong>. Imagine your
+        project gets about three. Each token lets you adopt one novel,
+        interesting technology. Spend a token on the thing that makes your
+        project special. Spend the rest of your choices on boring technology —
+        not because boring is good in itself, but because boring means
+        <em>known</em>.</p>
+
+      <aside class="callout">
+        <p><strong>The boring truth:</strong> "Boring" doesn't mean bad or old-fashioned.
+        It means the failure modes are well understood. When Postgres breaks at
+        3am, the answer is on the first page of search results. When this
+        month's hot new database breaks at 3am, you may be the first person to
+        ever see that error.</p>
+      </aside>
+
+      <h2>The capabilities you see, the failures you don't</h2>
+      <p>
+        Every technology choice is a bundle of things it does well (which the
+        documentation advertises) and ways it fails (which you discover in
+        production). New technology dazzles with the first list and hides the
+        second. Mature technology has had its failure list written out in
+        public, over decades, by other people — at their expense, not yours.
+      </p>
+
+      <p>
+        That's why "boring" technologies keep winning on merit: Postgres over
+        the newest database, server-rendered HTML over a single-page app,
+        plain CSS over a styling framework, cron over a distributed job queue.
+        Not always — but far more often than the excitement gradient suggests.
+      </p>
+
+      <h2>What this site is</h2>
+      <p>
+        This site teaches those technologies, and it is <em>built from</em>
+        them. Right now it is hand-written HTML and CSS: no framework, no
+        build step, no JavaScript. It will grow — quizzes, then a database,
+        then user accounts — but each layer of complexity gets added only when
+        the current stack genuinely hurts, and the moment it hurts is itself
+        the lesson. You'll see exactly what a database buys you, because
+        you'll feel life without one first.
+      </p>
+
+      <p>
+        The curriculum ahead: HTML, CSS, JavaScript, HTTP, SQL and Postgres,
+        forms, cookies and sessions, security, and the operational layer —
+        DNS, TLS, backups — that most tutorials skip.
+      </p>
+
+      <section class="quiz">
+        <h2>Check yourself</h2>
+        <details>
+          <summary>What is an "innovation token"?</summary>
+          <p>A budget metaphor: a project can only afford a small number of
+          novel technology choices. Spend them deliberately on what makes your
+          project special, and choose well-understood technology for
+          everything else.</p>
+        </details>
+        <details>
+          <summary>What does "boring" actually mean in this context?</summary>
+          <p>Well understood — especially the failure modes. A boring
+          technology is one whose ways of breaking have been documented by
+          decades of other people's production incidents.</p>
+        </details>
+        <details>
+          <summary>How did this quiz reveal its answers without JavaScript?</summary>
+          <p>With the HTML <code>&lt;details&gt;</code> and
+          <code>&lt;summary&gt;</code> elements — the browser provides the
+          tap-to-reveal behavior natively. That's the next lesson.</p>
+        </details>
+      </section>
+    </main>
+
+    <nav class="lesson-nav">
+      <a href="../index.html">← Home</a>
+      <a href="02-html.html">HTML →</a>
+    </nav>
+  </article>
+</body>
+</html>

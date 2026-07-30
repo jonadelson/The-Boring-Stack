@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Learn the boring technologies that quietly run the internet: HTML, CSS, JavaScript, Postgres, HTTP, and security.">
+  <title>The Boring Stack</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <header class="site-header">
+    <h1>The Boring Stack</h1>
+    <p class="tagline">The technologies nobody tweets about, quietly running everything.</p>
+  </header>
+
+  <main>
+    <p>
+      This site teaches the unglamorous technologies that are very often the right
+      choice: HTML, CSS, plain JavaScript, Postgres, HTTP, and the security
+      practices that hold it all together. It practices what it preaches — every
+      page here is hand-written HTML and CSS with no framework, no build step,
+      and (so far) no JavaScript at all.
+    </p>
+
+    <p>
+      <strong>Tap "view source" on any page.</strong> The site itself is the
+      first example in every lesson.
+    </p>
+
+    <h2>Lessons</h2>
+    <ol class="lesson-list">
+      <li>
+        <a href="lessons/01-why-boring.html">Why Boring?</a>
+        <span class="lesson-topic">philosophy</span>
+      </li>
+      <li>
+        <a href="lessons/02-html.html">HTML: Thirty Years Old and Still Undefeated</a>
+        <span class="lesson-topic">html</span>
+      </li>
+      <li>
+        <a href="lessons/03-css.html">CSS Without a Framework</a>
+        <span class="lesson-topic">css</span>
+      </li>
+    </ol>
+
+    <h2>The roadmap</h2>
+    <p>
+      This site will grow in phases, and each phase's <em>reason to exist</em> is
+      itself a lesson about when complexity earns its keep:
+    </p>
+    <ol>
+      <li><strong>Static pages</strong> — HTML and CSS fundamentals. <em>(You are here.)</em></li>
+      <li><strong>Interactivity</strong> — quizzes with vanilla JavaScript and localStorage.</li>
+      <li><strong>A server and Postgres</strong> — added only when localStorage's limits start to hurt.</li>
+      <li><strong>Authentication</strong> — sessions, password hashing, CSRF: security learned by building it.</li>
+      <li><strong>Operations</strong> — deployment, TLS, logs, backups.</li>
+    </ol>
+  </main>
+
+  <footer class="site-footer">
+    <p>Built with the boring stack, obviously. <a href="https://github.com/jonadelson/The-Boring-Stack">Source on GitHub</a>.</p>
+  </footer>
+</body>
+</html>

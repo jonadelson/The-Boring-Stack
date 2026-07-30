@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>HTML: Thirty Years Old and Still Undefeated — The Boring Stack</title>
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+  <article>
+    <header class="site-header">
+      <h1>HTML: Thirty Years Old and Still Undefeated</h1>
+      <p class="lesson-meta">Lesson 2 · html · ~6 min</p>
+    </header>
+
+    <main>
+      <p>
+        If you've mostly worked in ClojureScript (or React, or any component
+        framework), you've probably treated HTML as the stuff your components
+        compile down to — an output format, not a language you write. This
+        lesson argues you've been skipping one of the most leveraged
+        technologies in the whole stack.
+      </p>
+
+      <h2>Semantics: saying what things are</h2>
+      <p>
+        HTML's job is to describe <em>what content is</em>, not what it looks
+        like. A page built from <code>&lt;div&gt;</code> and
+        <code>&lt;span&gt;</code> says nothing; a page built from
+        <code>&lt;article&gt;</code>, <code>&lt;nav&gt;</code>,
+        <code>&lt;header&gt;</code>, and <code>&lt;main&gt;</code> tells
+        browsers, screen readers, search engines, and reader modes exactly
+        what they're looking at.
+      </p>
+
+      <p>This very page is structured like this:</p>
+
+<pre><code>&lt;article&gt;          the lesson as a whole
+  &lt;header&gt;         title and metadata
+  &lt;main&gt;           the lesson content
+    &lt;section&gt;      the quiz
+    &lt;aside&gt;        callout boxes
+  &lt;nav&gt;            previous/next links
+&lt;/article&gt;</code></pre>
+
+      <p>
+        Tap "view source" and check. Nothing on this page is a
+        <code>&lt;div&gt;</code> — not because divs are forbidden, but because
+        every piece of content here had a more specific element available.
+      </p>
+
+      <aside class="callout">
+        <p><strong>The boring truth:</strong> semantic HTML is the cheapest
+        accessibility work you will ever do. Screen readers navigate by
+        landmarks and headings. Use real elements and you get a usable
+        experience for free; use divs for everything and you'll spend weeks
+        retrofitting ARIA attributes to rebuild what the elements would have
+        given you.</p>
+      </aside>
+
+      <h2>The browser ships more than you think</h2>
+      <p>
+        A modern browser has built-in, no-JavaScript implementations of a
+        surprising amount of UI:
+      </p>
+      <ul>
+        <li><code>&lt;details&gt;</code>/<code>&lt;summary&gt;</code> —
+          tap-to-expand disclosure (powering the quizzes on this site)</li>
+        <li><code>&lt;dialog&gt;</code> — modal dialogs, with focus trapping</li>
+        <li><code>&lt;input type="date"&gt;</code> — a native date picker</li>
+        <li><code>&lt;datalist&gt;</code> — autocomplete suggestions</li>
+        <li><code>&lt;form&gt;</code> validation — <code>required</code>,
+          <code>pattern</code>, <code>type="email"</code>, all enforced before
+          submission</li>
+      </ul>
+      <p>
+        Each of these has been reimplemented thousands of times in JavaScript,
+        usually worse: heavier, less accessible, broken on somebody's device.
+        The boring-stack instinct is to ask "does the platform already do
+        this?" before reaching for code.
+      </p>
+
+      <h2>HTML is fault-tolerant by design</h2>
+      <p>
+        Forget a closing tag and the page still renders. Use an element the
+        browser doesn't know and it renders the content inside anyway. This
+        wasn't sloppiness — it's why a page written in 1995 still works today,
+        and why a page you write today will outlive every framework currently
+        in fashion. Very few technologies offer a thirty-year compatibility
+        guarantee. That is what "boring" buys.
+      </p>
+
+      <section class="quiz">
+        <h2>Check yourself</h2>
+        <details>
+          <summary>What's the practical difference between a page of divs and
+            a page of semantic elements?</summary>
+          <p>They can look identical, but the semantic page is navigable by
+          screen readers, understood by search engines and reader modes, and
+          self-documenting to the next developer. The div page communicates
+          nothing beyond its visual appearance.</p>
+        </details>
+        <details>
+          <summary>You need a collapsible FAQ section. What's the boring-stack
+            first move?</summary>
+          <p>Check whether the platform already provides it — and it does:
+          <code>&lt;details&gt;</code>/<code>&lt;summary&gt;</code>, no
+          JavaScript required.</p>
+        </details>
+        <details>
+          <summary>Why does HTML ignore errors instead of refusing to render?</summary>
+          <p>Fault tolerance was a design goal: content should survive
+          imperfect markup and decades of language evolution. It's a big part
+          of why old pages still work and new pages degrade gracefully on old
+          browsers.</p>
+        </details>
+      </section>
+    </main>
+
+    <nav class="lesson-nav">
+      <a href="01-why-boring.html">← Why Boring?</a>
+      <a href="03-css.html">CSS →</a>
+    </nav>
+  </article>
+</body>
+</html>
