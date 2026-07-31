@@ -1,0 +1,200 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>JavaScript: The Language Under the Frameworks — The Boring Stack</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <script src="../js/quiz.js" defer></script>
+</head>
+<body>
+  <article>
+    <header class="site-header">
+      <h1>JavaScript: The Language Under the Frameworks</h1>
+      <p class="lesson-meta">Lesson 11 · javascript · ~10 min</p>
+    </header>
+
+    <main>
+      <p>
+        JavaScript was designed in ten days in 1995, and has spent thirty
+        years evolving under one absolute constraint: <strong>never break
+        the web.</strong> Code from 1997 still runs. That's a deeply
+        boring-stack virtue with a price — every early mistake is still
+        in the language, permanently, next to the modern feature that
+        fixed it. So practical JavaScript fluency isn't knowing
+        everything; it's knowing which half to use. This lesson is that
+        half, plus the handful of semantics that bite people arriving
+        from other languages.
+      </p>
+
+      <h2>Declarations: two keywords, not three</h2>
+      <p>
+        Use <code>const</code> by default and <code>let</code> when
+        rebinding is genuinely needed; both are block-scoped, like you'd
+        expect. The third keyword, <code>var</code>, is a 1995 wart —
+        function-scoped, hoisted, quietly global-prone — kept alive by
+        the never-break rule. Recognize it in old code; don't write it.
+        One trap in <code>const</code>: it freezes the <em>binding</em>,
+        not the value. A <code>const</code> array happily accepts
+        <code>.push()</code> — constancy of the name, not the
+        contents.
+      </p>
+
+      <h2>Equality: one operator, and identity for objects</h2>
+      <p>
+        <code>==</code> coerces types before comparing, with rules
+        nobody fully remembers (<code>0 == ''</code> is true).
+        <code>===</code> compares without coercion. The boring rule:
+        <strong>always <code>===</code></strong>, and the whole problem
+        class disappears.
+      </p>
+      <p>
+        The deeper semantic: for objects and arrays, even
+        <code>===</code> compares <em>identity</em>, not contents —
+        <code>{a: 1} === {a: 1}</code> is <code>false</code>; they're
+        two different objects. JavaScript has no built-in value equality
+        for structures. If you're used to a language where data compares
+        by value, this is the single biggest mental shift — and it's
+        also exactly why React circles endlessly around "referential
+        equality," memoization, and dependency arrays. That entire
+        subculture is downstream of this paragraph.
+      </p>
+
+      <h2>Mutability: everything's open unless you discipline it</h2>
+      <p>
+        Objects and arrays are mutable, shared by reference, and passed
+        around freely — any holder of a reference can change the data
+        for everyone. The language won't stop you; discipline is
+        cultural. The modern idiom leans copy-flavored: spread syntax
+        (<code>{...user, name: 'new'}</code>) builds an updated copy,
+        and newer array methods like <code>toSorted()</code> return
+        fresh arrays where old <code>sort()</code> mutated in place.
+        One caveat: spreads copy one level deep — nested objects inside
+        are still shared with the original.
+      </p>
+
+      <h2>Closures: the feature this site already runs on</h2>
+<pre><code>questions.forEach((details, index) =&gt; {
+  button.addEventListener('click', () =&gt; {
+    progress[keyFor(index)] = { result, ... };
+  });
+});</code></pre>
+      <p>
+        A function keeps access to the variables where it was
+        <em>defined</em>, even when called much later from somewhere
+        else. That's a closure, and you've already shipped some: in
+        <code>quiz.js</code>, each click listener remembers its own
+        <code>index</code> and <code>details</code> long after the
+        <code>forEach</code> finished — ten listeners, each closing over
+        different values. Closures are how JavaScript does what other
+        languages need classes for: bundling behavior with the state it
+        operates on. Event-driven code is closures all the way down.
+      </p>
+
+      <h2><code>this</code>: the famous trap, mostly avoidable</h2>
+      <p>
+        In most languages, what <code>this</code> means is fixed where
+        the code is written. In JavaScript, it's decided by <em>how the
+        function is called</em> — the same function can see a different
+        <code>this</code> per call, and a method handed around as a
+        callback silently loses its object. Thirty years of bugs live
+        there. The modern escape is pleasantly boring: arrow functions
+        don't have their own <code>this</code> (they see their
+        surroundings, like any closure), so use arrows for callbacks,
+        shorthand methods on objects, and you'll rarely meet the trap.
+        Notice <code>quiz.js</code> never mentions <code>this</code> at
+        all — closures over plain data made it unnecessary.
+      </p>
+
+      <h2>The absent-value duo and its modern fixes</h2>
+      <p>
+        JavaScript has two nothings: <code>undefined</code> (never set)
+        and <code>null</code> (deliberately empty). Historically they
+        were handled with truthiness checks (<code>value ||
+        fallback</code>) — which misfire on legitimate falsy values like
+        <code>0</code> and <code>''</code>. The modern operators are
+        precise: <code>??</code> falls back only on the two nothings,
+        and <code>?.</code> reaches into possibly-absent structures
+        without throwing. <code>quiz.js</code> uses both:
+      </p>
+<pre><code>return JSON.parse(localStorage.getItem(STORAGE_KEY)) ?? {};
+const result = progress[keyFor(index)]?.result;</code></pre>
+
+      <h2>One thread and an event loop</h2>
+      <p>
+        JavaScript runs your page on a single thread. Nothing
+        interrupts a running function — which is why shared data needs
+        no locks and a listener can update state fearlessly — but also
+        why nothing else happens until it returns. The browser keeps a
+        queue: your script runs to completion, then the next event's
+        handler, then the next. Slow work therefore must not block;
+        it's handed to the browser, which queues a callback for later.
+        That model has a whole grammar — promises,
+        <code>async/await</code> — that we'll learn when the phase 3
+        server gives us real waiting to do (network calls), where it
+        stops being avoidable.
+      </p>
+
+      <aside class="callout">
+        <p><strong>The boring truth:</strong> for years, "JavaScript
+        development" meant compiling better languages into JavaScript —
+        transpilers, polyfills, build pipelines. That era quietly ended.
+        Since 2015 the language has absorbed its community's best ideas
+        (modules, classes, spread, <code>??</code>, <code>?.</code>,
+        <code>async</code>), and every browser ships them natively.
+        Written with taste — <code>const</code>, <code>===</code>,
+        arrows, the modern operators — plain JavaScript needs no build
+        step at all. This site is the demonstration: view source shows
+        the exact code the browser runs.</p>
+      </aside>
+
+      <section class="quiz">
+        <h2>Check yourself</h2>
+        <details>
+          <summary>Why is <code>{a: 1} === {a: 1}</code> false, and what
+            fashionable framework topic is downstream of it?</summary>
+          <p>Objects compare by identity, not contents — these are two
+          distinct objects. React's whole memoization/referential-
+          equality/dependency-array discourse exists because re-created
+          objects never equal their previous versions.</p>
+        </details>
+        <details>
+          <summary>What does <code>const</code> actually make constant?</summary>
+          <p>The binding — the name can't be reassigned. The value it
+          points to is as mutable as ever: a <code>const</code> array
+          can still be pushed to.</p>
+        </details>
+        <details>
+          <summary>In <code>quiz.js</code>, how does each button's click
+            listener know which question it belongs to?</summary>
+          <p>Closure: each listener was defined inside a
+          <code>forEach</code> iteration and permanently captures that
+          iteration's <code>index</code> and <code>details</code>
+          variables.</p>
+        </details>
+        <details>
+          <summary>When does <code>value || fallback</code> misbehave,
+            and what replaces it?</summary>
+          <p>When <code>0</code>, <code>''</code>, or
+          <code>false</code> are legitimate values — they're falsy, so
+          the fallback wrongly wins. <code>value ?? fallback</code>
+          falls back only on <code>null</code> and
+          <code>undefined</code>.</p>
+        </details>
+        <details>
+          <summary>Why does single-threading make shared state easier,
+            and what does it forbid?</summary>
+          <p>No handler can be interrupted mid-run, so there are no
+          data races and no locks. In exchange, nothing may block: slow
+          work must be handed off and resumed via the event queue.</p>
+        </details>
+      </section>
+    </main>
+
+    <nav class="lesson-nav">
+      <a href="10-dom.html">← The DOM</a>
+      <a href="../index.html">Home →</a>
+    </nav>
+  </article>
+</body>
+</html>
