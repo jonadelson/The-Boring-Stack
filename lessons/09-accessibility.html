@@ -1,0 +1,174 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Accessibility: The Quality You Get For Free, Until You Don't — The Boring Stack</title>
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+  <article>
+    <header class="site-header">
+      <h1>Accessibility: The Quality You Get For Free, Until You Don't</h1>
+      <p class="lesson-meta">Lesson 9 · html · ~8 min</p>
+    </header>
+
+    <main>
+      <p>
+        Accessibility has a reputation as a compliance chore bolted on at
+        the end. The reality is closer to the opposite: on the boring
+        stack, most of it is the <em>default</em>, and inaccessibility is
+        something teams build, expensively, by fighting the platform.
+        This lesson is partly new material and partly a revelation about
+        lessons you've already read — because without saying so, this
+        site has been doing accessibility work since lesson 2.
+      </p>
+
+      <h2>Who it's for (it's you)</h2>
+      <p>
+        The blind user with a screen reader is real and matters. But
+        disability is a spectrum with three bands — permanent (blindness),
+        temporary (eye surgery, a broken arm), and situational (bright
+        sunlight, a phone held one-handed on a train, a video watched
+        muted). Everyone occupies the third band regularly. Captions were
+        built for deaf users; most caption-hours today happen in muted
+        feeds. Keyboard navigation was built for motor impairments; its
+        heaviest users are developers with a broken trackpad and power
+        users who hate the mouse. Build for the edge and the middle
+        benefits — that's not charity, it's engineering.
+      </p>
+
+      <h2>How a screen reader sees this page</h2>
+      <p>
+        Assistive technology doesn't read your pixels; it reads the
+        browser's <strong>accessibility tree</strong> — a structured
+        outline derived from your markup. Screen reader users don't sit
+        through pages top to bottom: they jump landmark to landmark
+        (<code>&lt;main&gt;</code>, <code>&lt;nav&gt;</code>), skim
+        heading to heading, and pull up lists of all links. Which means
+        the semantic HTML from lesson 2 wasn't stylistic preference — it
+        was the data structure assistive tech navigates by. A div-soup
+        page presents to that tree as one undifferentiated blob:
+        technically present, practically unusable.
+      </p>
+      <p>
+        Two consequences worth internalizing. Headings are an outline, so
+        their <em>levels must nest</em> — jumping from
+        <code>h1</code> to <code>h4</code> because the h4 "looked right"
+        breaks navigation; if the size is wrong, fix it in CSS. And link
+        text is read <em>out of context</em> in those link lists — a page
+        of "click here" and "read more" becomes a menu of identical
+        mystery doors. Name the destination: "read the full roadmap."
+      </p>
+
+      <h2>Links go places, buttons do things</h2>
+      <p>
+        The most common accessibility sin in framework code is the
+        clickable <code>&lt;div&gt;</code>. A real
+        <code>&lt;button&gt;</code> is focusable by Tab, activates on
+        Enter and Space, and announces itself as a button — three
+        behaviors a div-with-onClick has to reimplement and almost never
+        does. The distinction matters too: a <em>link</em> navigates (and
+        supports open-in-new-tab, copy address, all the browser's link
+        affordances); a <em>button</em> acts. Styling a button to look
+        like a link, or vice versa, is fine. Swapping the elements is
+        not.
+      </p>
+      <p>
+        The keyboard test takes thirty seconds and finds most problems:
+        put down the mouse, Tab through the page. Can you reach every
+        control? Can you <em>see</em> where you are? If focus is
+        invisible, someone "fixed" the focus outline with
+        <code>outline: none</code> and forgot the people it existed for —
+        the modern move is <code>:focus-visible</code>, which shows the
+        ring for keyboard users without flashing it at mouse clicks.
+      </p>
+
+      <h2>Color is a hint, never the message</h2>
+      <p>
+        Two rules. <strong>Contrast:</strong> text needs roughly a 4.5:1
+        ratio against its background — grey-on-grey aesthetics fail real
+        eyes in real sunlight, and free checkers will grade any pair of
+        colors. <strong>Redundancy:</strong> about 8% of men see red and
+        green differently, so "errors are in red" must also be "errors
+        are marked with a message" — color reinforces, something else
+        carries. (The forms lesson's invalid-field styling pairs the red
+        border with the browser's error text for exactly this reason.)
+      </p>
+
+      <h2>About ARIA</h2>
+      <p>
+        You'll meet <code>aria-*</code> attributes — a vocabulary for
+        annotating markup with roles and states that HTML can't express.
+        It has an official First Rule, and the boring stack endorses it
+        completely: <strong>don't use ARIA when a native element does
+        the job.</strong> <code>&lt;button&gt;</code> beats
+        <code>&lt;div role="button" tabindex="0"&gt;</code> plus the
+        keyboard handlers you forgot. ARIA is a repair kit for the gaps —
+        this site's SVG diagram uses <code>role="img"</code> and an
+        <code>aria-label</code> because SVG genuinely needs the help.
+        A page needing lots of ARIA is usually a page that chose the
+        wrong elements.
+      </p>
+
+      <aside class="callout">
+        <p><strong>The boring truth:</strong> almost everything in this
+        lesson was already done in lessons 2 through 8 — landmarks and
+        headings (2), labeled inputs and native validation (6), alt text
+        and the labeled SVG (8). That's the point. Accessibility on the
+        boring stack is mostly <em>not undoing</em> what the platform
+        provides. The expensive retrofits happen on rung 5, where teams
+        rebuild links, buttons, and forms from divs and then buy back
+        each native behavior one bug report at a time.</p>
+      </aside>
+
+      <h2>Try it: the visceral version</h2>
+      <p>
+        You're on your phone. Turn on the screen reader — VoiceOver on
+        iOS (Settings → Accessibility), TalkBack on Android — and swipe
+        through this page with your eyes closed. Then try a div-heavy
+        site you know. Five minutes of that teaches more than any
+        checklist, and it turns the accessibility tree from an
+        abstraction into an experience.
+      </p>
+
+      <section class="quiz">
+        <h2>Check yourself</h2>
+        <details>
+          <summary>Why do heading levels have to nest properly when CSS
+            can make any heading any size?</summary>
+          <p>Headings form the document outline that screen reader users
+          navigate by — skipping levels breaks the structure. Visual
+          size is CSS's job; the level is semantics.</p>
+        </details>
+        <details>
+          <summary>What three things does a real
+            <code>&lt;button&gt;</code> provide that a clickable div
+            doesn't?</summary>
+          <p>Keyboard focusability (Tab), activation via Enter and
+          Space, and announcing itself as a button to assistive tech —
+          all free, all missing from the div until hand-rebuilt.</p>
+        </details>
+        <details>
+          <summary>What's the thirty-second accessibility test, and what
+            does it catch?</summary>
+          <p>Put down the mouse and Tab through the page: unreachable
+          controls, invisible focus (<code>outline: none</code>), and
+          broken ordering — the majority of common failures.</p>
+        </details>
+        <details>
+          <summary>What's the First Rule of ARIA?</summary>
+          <p>Don't use it if a native HTML element or attribute already
+          provides the semantics and behavior — reach for ARIA only to
+          fill genuine gaps, like labeling an inline SVG.</p>
+        </details>
+      </section>
+    </main>
+
+    <nav class="lesson-nav">
+      <a href="08-images.html">← Images</a>
+      <a href="../index.html">Home →</a>
+    </nav>
+  </article>
+</body>
+</html>
