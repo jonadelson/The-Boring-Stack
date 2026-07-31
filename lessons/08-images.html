@@ -1,0 +1,193 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Images: Why Sites Are Slow — The Boring Stack</title>
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+  <article>
+    <header class="site-header">
+      <h1>Images: Why Sites Are Slow</h1>
+      <p class="lesson-meta">Lesson 8 · media · ~8 min</p>
+    </header>
+
+    <main>
+      <p>
+        The median web page ships a couple of megabytes, and images are
+        most of it. Not JavaScript, not CSS — pictures. Which makes media
+        handling the highest-leverage performance skill on the web, and one
+        of the most mechanical: a handful of boring decisions, each worth
+        more than a month of code optimization. You may have noticed this
+        site has no images at all; by the end of this lesson that will read
+        as a decision rather than an absence.
+      </p>
+
+      <h2>The element, done properly</h2>
+<pre><code>&lt;img src="cat.jpg"
+     alt="A grey cat asleep on a laptop keyboard"
+     width="1200" height="800"
+     loading="lazy"&gt;</code></pre>
+      <p>Every attribute is carrying weight:</p>
+      <ul>
+        <li>
+          <strong><code>alt</code></strong> — what the image <em>means</em>,
+          for screen readers, broken connections, and search engines. The
+          test: if the image vanished and its alt text appeared instead,
+          would the page still make sense? Decorative flourishes get
+          <code>alt=""</code> — empty, but present — so screen readers know
+          to skip them rather than announce a mystery.
+        </li>
+        <li>
+          <strong><code>width</code> and <code>height</code></strong> — not
+          for display size (CSS controls that) but for <em>shape</em>. They
+          let the browser reserve the right space before the image loads.
+          Omit them and you get the web's most hated experience: text that
+          jumps just as you tap it, because an image above finally arrived.
+          The metric is called Cumulative Layout Shift; the fix is two
+          attributes.
+        </li>
+        <li>
+          <strong><code>loading="lazy"</code></strong> — below-the-fold
+          images wait until the reader scrolls near them. Free bandwidth
+          savings, one attribute, no JavaScript. (The old way was an
+          entire library.)
+        </li>
+      </ul>
+
+      <h2>Four formats cover everything</h2>
+      <ul>
+        <li><strong>JPEG</strong> — photographs. Lossy, small, thirty years
+          old, still fine.</li>
+        <li><strong>PNG</strong> — screenshots, flat graphics, and anything
+          needing transparency. Lossless, so photos-as-PNG are the classic
+          10× size mistake.</li>
+        <li><strong>SVG</strong> — icons, logos, diagrams. Not pixels but
+          <em>instructions</em>: text markup, infinitely scalable, usually
+          tiny, styleable with CSS. More below.</li>
+        <li><strong>WebP / AVIF</strong> — modern replacements that make
+          JPEGs 30–50% smaller at the same quality. Universally supported
+          now; the only reason the web is still full of JPEGs is
+          inertia.</li>
+      </ul>
+
+      <h2>SVG deserves a demonstration</h2>
+      <p>
+        This diagram is not an image file. It's markup, written by hand,
+        sitting right in this page — view source and find it. Its colors
+        come from the site's CSS variables, so it obeys dark mode like
+        everything else:
+      </p>
+      <svg viewBox="0 0 320 120" role="img" aria-label="Diagram: a small SVG file scales cleanly to any size, while a bitmap enlarges into visible pixel blocks" style="max-width: 100%; height: auto;">
+        <style>
+          .box { fill: none; stroke: var(--accent); stroke-width: 2; }
+          .svg-label { font: 12px system-ui, sans-serif; fill: var(--text); }
+        </style>
+        <circle class="box" cx="45" cy="45" r="22"/>
+        <text class="svg-label" x="45" y="100" text-anchor="middle">vector, 2 KB</text>
+        <g>
+          <rect class="box" x="200" y="23" width="15" height="15"/>
+          <rect class="box" x="215" y="23" width="15" height="15"/>
+          <rect class="box" x="230" y="38" width="15" height="15"/>
+          <rect class="box" x="200" y="38" width="15" height="15"/>
+          <rect class="box" x="215" y="53" width="15" height="15"/>
+          <rect class="box" x="230" y="23" width="15" height="15"/>
+        </g>
+        <text class="svg-label" x="222" y="100" text-anchor="middle">bitmap, enlarged</text>
+      </svg>
+      <p>
+        Because SVG is text, it plays by text's rules: version control
+        diffs it, gzip crushes it, and you can edit it with find-and-replace.
+        For icons and diagrams it beats every pixel format on every axis.
+      </p>
+
+      <h2>Don't send a billboard to a phone</h2>
+      <p>
+        A 4000-pixel-wide photo displayed in a 350-pixel column is about
+        90% wasted bytes — the single most common image mistake. The
+        boring fix is <code>srcset</code>: list the same image at several
+        widths and let the browser pick the smallest sufficient one for
+        the actual device:
+      </p>
+<pre><code>&lt;img src="cat-800.jpg"
+     srcset="cat-400.jpg 400w,
+             cat-800.jpg 800w,
+             cat-1600.jpg 1600w"
+     sizes="(min-width: 40rem) 65ch, 100vw"
+     alt="..."&gt;</code></pre>
+      <p>
+        The browser knows the screen, the pixel density, and eventually
+        even the connection quality — decisions you couldn't make
+        server-side if you tried. You just have to offer the options.
+        One flexible-width CSS rule completes the setup, and this site's
+        stylesheet now includes it: images never overflow their column
+        (<code>max-width: 100%</code>).
+      </p>
+
+      <aside class="callout">
+        <p><strong>The boring truth:</strong> the fastest image is the one
+        you don't send. This site's pages are a few kilobytes each — they
+        load instantly on a bad connection not because of clever
+        engineering but because text is the most optimized format ever
+        shipped. Every image earns its bytes or doesn't board. The same
+        judgment, applied with less rigor, is why the median page is a
+        hundred times heavier than it needs to be.</p>
+      </aside>
+
+      <h2>Video and audio, briefly</h2>
+      <p>
+        <code>&lt;video controls&gt;</code> and
+        <code>&lt;audio controls&gt;</code> give you native players — play,
+        pause, scrub, fullscreen, captions via
+        <code>&lt;track&gt;</code> — with no library. The one non-obvious
+        move: never autoplay with sound (browsers block it anyway), and
+        give videos the <code>poster</code> attribute so something sensible
+        shows before play. Hosting video files is the point where "boring"
+        means <em>use someone else's infrastructure</em> — video delivery
+        is a genuinely hard problem, and embedding is usually the right
+        rung.
+      </p>
+
+      <section class="quiz">
+        <h2>Check yourself</h2>
+        <details>
+          <summary>Why set <code>width</code> and <code>height</code> on
+            images when CSS controls display size anyway?</summary>
+          <p>They give the browser the image's proportions before it
+          loads, so space gets reserved and the page doesn't jump when
+          the image arrives — eliminating layout shift.</p>
+        </details>
+        <details>
+          <summary>Photo of a sunset, company logo, screenshot of an error
+            dialog: which format for each?</summary>
+          <p>Sunset: JPEG (or better, WebP/AVIF) — lossy suits photos.
+          Logo: SVG — scalable, tiny, CSS-styleable. Screenshot: PNG —
+          lossless keeps text crisp (JPEG artifacts smear sharp
+          edges).</p>
+        </details>
+        <details>
+          <summary>What problem does <code>srcset</code> solve, and why is
+            the browser the right decision-maker?</summary>
+          <p>It stops phones from downloading desktop-sized images by
+          offering multiple widths. The browser picks, because only it
+          knows the device's screen size, pixel density, and connection —
+          things the server can't reliably see.</p>
+        </details>
+        <details>
+          <summary>When is <code>alt=""</code> (empty) correct, and how is
+            it different from omitting <code>alt</code>?</summary>
+          <p>Empty alt marks an image as decorative, telling screen
+          readers to skip it silently. A missing alt attribute leaves
+          them to announce the filename — noise that helps no one.</p>
+        </details>
+      </section>
+    </main>
+
+    <nav class="lesson-nav">
+      <a href="07-urls.html">← URLs</a>
+      <a href="../index.html">Home →</a>
+    </nav>
+  </article>
+</body>
+</html>

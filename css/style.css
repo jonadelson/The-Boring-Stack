@@ -92,6 +92,14 @@ pre code {
   padding: 0;
 }
 
+/* Media never overflows its column: it shrinks to fit, and height: auto
+ * preserves the aspect ratio set by width/height attributes. The classic
+ * two-line responsive-image rule. */
+img, svg, video {
+  max-width: 100%;
+  height: auto;
+}
+
 /* ---------------------------------------------------------------------------
  * 3. Site furniture: header, footer, lesson list.
  * ------------------------------------------------------------------------- */
