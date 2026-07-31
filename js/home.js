@@ -1,29 +1,24 @@
 /* Home-page progress badges (phase 2).
  *
- * This script writes nothing. It reads the quiz results the lesson pages
- * stored and annotates the lesson list with them — possible because
+ * This script changes no stored data. It reads the quiz results the
+ * lesson pages stored and annotates the lesson list — possible because
  * localStorage is shared per origin: every page on this site sees the
  * same store. Lesson 12 explains the model.
  */
 
-const STORAGE_KEY = 'boring-stack:quiz';
-
-let progress;
-try {
-  progress = JSON.parse(localStorage.getItem(STORAGE_KEY)) ?? {};
-} catch {
-  progress = {};
-}
+const progress = srsLoad();
 
 /* Stored keys look like "/lessons/06-forms.html#q2" (plus any hosting
- * prefix). Fold them into per-page tallies. */
+ * prefix). Fold them into per-page tallies, and count what's due. */
 const byPath = {};
+let dueCount = 0;
 for (const [key, entry] of Object.entries(progress)) {
   const path = key.split('#')[0];
   const counts = (byPath[path] ??= { right: 0, wrong: 0 });
   if (entry && (entry.result === 'right' || entry.result === 'wrong')) {
     counts[entry.result] += 1;
   }
+  if (srsIsDue(entry)) dueCount += 1;
 }
 
 /* anchor.pathname is the link's resolved absolute path — the same form
@@ -40,4 +35,9 @@ for (const link of document.querySelectorAll('.lesson-list a')) {
     counts.wrong ? `${counts.wrong} ✗` : '',
   ].filter(Boolean).join(' ');
   link.closest('li').append(' ', badge);
+}
+
+const reviewLink = document.getElementById('review-link');
+if (reviewLink && dueCount > 0) {
+  reviewLink.textContent = `Review queue — ${dueCount} due`;
 }

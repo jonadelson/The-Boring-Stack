@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>The DOM and Events: Your First Sprinkle — The Boring Stack</title>
   <link rel="stylesheet" href="../css/style.css">
+  <script src="../js/srs.js" defer></script>
   <script src="../js/quiz.js" defer></script>
 </head>
 <body>
@@ -70,8 +71,7 @@ controls.append(button);</code></pre>
 
       <h2>Events: the page talks back</h2>
 <pre><code>button.addEventListener('click', () =&gt; {
-  progress[keyFor(index)] = { result, at: new Date().toISOString() };
-  saveAll(progress);
+  srsRecord(progress, keyFor(index), result);
   renderQuestion(details, index);
   renderTally();
 });</code></pre>

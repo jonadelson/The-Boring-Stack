@@ -1,0 +1,210 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Spaced Repetition: A Learning Machine in Thirty Lines — The Boring Stack</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <script src="../js/srs.js" defer></script>
+  <script src="../js/quiz.js" defer></script>
+</head>
+<body>
+  <article>
+    <header class="site-header">
+      <h1>Spaced Repetition: A Learning Machine in Thirty Lines</h1>
+      <p class="lesson-meta">Lesson 14 · javascript · ~10 min</p>
+    </header>
+
+    <main>
+      <p>
+        Phase 2 closes with its promised finale: this site is now an
+        actual learning machine. Grading a quiz doesn't just record your
+        answer anymore — it schedules the question's return, and a new
+        <a href="../review.html">review page</a> gathers everything due
+        today from every lesson into one queue, with a streak counter to
+        keep you honest. This lesson explains the two interesting parts:
+        the scheduling algorithm (thirty lines, invented in 1987) and
+        where the review page gets its flashcards (a trick worth
+        stealing).
+      </p>
+
+      <h2>The science, in one paragraph</h2>
+      <p>
+        Two findings from a century of memory research do all the work.
+        The <strong>testing effect</strong>: retrieving a fact
+        strengthens it far more than rereading it — which is why these
+        lessons end in quizzes rather than summaries. And the
+        <strong>spacing effect</strong>: retrieval strengthens memory
+        most when it happens just as you're about to forget — and each
+        successful rescue pushes the next forgetting further out. So the
+        ideal schedule asks you each question at ever-growing intervals:
+        tomorrow, next week, next month. Nobody can run that schedule by
+        hand across hundreds of questions. It's a bookkeeping problem —
+        which is to say, a job for software.
+      </p>
+
+      <h2>SM-2: the boring algorithm that won</h2>
+      <p>
+        In 1987, Piotr Woźniak worked out a scheduling algorithm for his
+        SuperMemo software; nearly forty years later, his
+        <strong>SM-2</strong> still powers Anki and most serious
+        flashcard tools. It has outlived every clever successor for the
+        boring reason: simple enough to trust, good enough to work. Our
+        two-button version, from <code>js/srs.js</code>:
+      </p>
+<pre><code>function srsSchedule(previous, result) {
+  const ease = previous?.ease ?? 2.5;
+  const interval = previous?.interval ?? 0;
+
+  if (result === 'wrong') {
+    return { interval: 0, ease: Math.max(1.3, ease - 0.2) };
+  }
+  return {
+    interval: interval === 0 ? 1
+            : interval === 1 ? 6
+            : Math.round(interval * ease),
+    ease: ease + 0.05,
+  };
+}</code></pre>
+      <p>
+        Each question carries two numbers. The <strong>interval</strong>
+        is days until it's due again: first success, one day; second,
+        six; after that, multiply by ease. The <strong>ease</strong> is
+        the question's personal growth rate, starting at 2.5: so the
+        gaps run 1, 6, 15, 38, 97 days — five confident answers and a
+        question retires for months. Miss one and the interval resets
+        to zero <em>and the ease drops</em> (floored at 1.3), so a
+        question that keeps tripping you returns on a permanently
+        gentler curve. Hard cards get patience; easy cards get out of
+        your way. That's the whole machine.
+      </p>
+
+      <h2>Schema evolution, rehearsed small</h2>
+      <p>
+        Progress entries used to hold <code>{result, at}</code>; the
+        scheduler adds <code>interval</code>, <code>ease</code>, and
+        <code>due</code>. Your pre-existing grades weren't wiped — the
+        <code>?? 2.5</code> and <code>?? 0</code> defaults read any old
+        entry as "brand new card," and the due-check treats entries
+        with no due date as due now, so old progress flowed into the
+        queue instead of stranding. That's a real technique with a
+        name — <em>backward-compatible schema migration</em> — and
+        phase 3 does it formally, with a database and migration files.
+        You've now done it informally, in a browser, on your own
+        data.
+      </p>
+
+      <h2>Where do the flashcards come from?</h2>
+      <p>
+        The review page has a problem: the questions live in fourteen
+        lesson files, and duplicating them into some data file would
+        mean two copies to keep in sync — the sin every lesson here
+        warns about. The solution is the site's most instructive trick
+        so far, from <code>js/review.js</code>:
+      </p>
+<pre><code>const response = await fetch(path);
+const doc = new DOMParser()
+  .parseFromString(await response.text(), 'text/html');
+return doc.querySelectorAll('.quiz details');</code></pre>
+      <p>
+        <code>fetch</code> requests a page the same way tapping a link
+        does — lesson 5's GET, issued from script. <code>DOMParser</code>
+        turns the returned text into a detached document we can query
+        with the selectors we already know, and the review page lifts
+        the <code>&lt;details&gt;</code> elements out and drops them
+        into its own queue. <strong>The lessons are the database, and
+        HTML is the data format.</strong> No duplication, no build step,
+        no JSON export — the semantic markup from lesson 2 turns out to
+        be structured enough to query. (A tidy detail: scripts inside a
+        parsed document never run, so the lifted questions arrive
+        pristine, without their injected grading buttons.)
+      </p>
+      <p>
+        Two firsts arrived in that snippet. <code>await</code> is our
+        first async JavaScript — those two waits are the "hand it to
+        the browser, resume later" mechanism lesson 11 promised, and
+        phase 3 gives promises their full lesson when a server makes
+        waiting constant. And fetching HTML to swap into a page is
+        rung 3 of the ladder — the htmx idea — met here in its
+        smallest possible form.
+      </p>
+
+      <h2>The honest island</h2>
+      <p>
+        The review page is this site's first JavaScript-required
+        feature, and lesson 13 says that demands honesty, not apology:
+        the queue's entire job is reading this browser's localStorage,
+        which no server and no static HTML can do. So the page's
+        baseline says exactly that, in plain HTML, and the boundary is
+        drawn tight — one page is an island; every lesson remains
+        script-optional. Note also what the streak data means:
+        <em>the site now has state that isn't derivable from anything
+        else.</em> Progress, eases, streaks — real data, living in a
+        cache the browser may clear, on a device your other devices
+        can't see. Phase 2 is complete, and it has manufactured
+        phase 3's justification entirely by succeeding.
+      </p>
+
+      <aside class="callout">
+        <p><strong>The boring truth:</strong> there is a billion-dollar
+        industry of learning apps, and the irreducible core of what
+        they do — the part the memory science actually supports — is
+        the thirty lines above plus a queue. Everything else is
+        packaging. This is the boring stack's recurring lesson in its
+        purest form: find the load-bearing algorithm, implement it
+        plainly, let the platform do the rest.</p>
+      </aside>
+
+      <section class="quiz">
+        <h2>Check yourself</h2>
+        <details>
+          <summary>What are the testing effect and the spacing effect,
+            and what does each justify?</summary>
+          <p>Retrieval strengthens memory more than rereading (testing
+          effect — hence quizzes), and retrieval works best just before
+          forgetting, with each success pushing forgetting further out
+          (spacing effect — hence growing review intervals).</p>
+        </details>
+        <details>
+          <summary>In SM-2, what do interval and ease each track, and
+            what happens to them on a miss?</summary>
+          <p>Interval is days until the question is due again; ease is
+          that question's personal growth multiplier. A miss resets the
+          interval to zero and lowers the ease (floored at 1.3), so the
+          question returns sooner and grows gentler permanently.</p>
+        </details>
+        <details>
+          <summary>How did old progress entries survive the scheduler's
+            new schema?</summary>
+          <p>Defensive defaults: missing ease and interval read as a
+          new card, and a missing due date reads as due now. A
+          backward-compatible schema migration — phase 3 does the same
+          thing formally.</p>
+        </details>
+        <details>
+          <summary>Why does the review page fetch lesson HTML instead of
+            keeping questions in a data file?</summary>
+          <p>One source of truth: the lessons already contain the
+          questions as queryable semantic markup. fetch + DOMParser
+          reads them in place — no duplicate copy to drift out of
+          sync.</p>
+        </details>
+        <details>
+          <summary>Why is the review page allowed to require JavaScript
+            when the lessons aren't?</summary>
+          <p>Its core job — reading this browser's localStorage — is
+          something only client-side script can do; no functional no-JS
+          baseline exists. Lesson 13's discipline: draw the island's
+          boundary tightly and honestly, and keep everything around it
+          enhancement-based.</p>
+        </details>
+      </section>
+    </main>
+
+    <nav class="lesson-nav">
+      <a href="13-progressive-enhancement.html">← Progressive enhancement</a>
+      <a href="../review.html">Try the review queue →</a>
+    </nav>
+  </article>
+</body>
+</html>

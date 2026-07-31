@@ -225,6 +225,20 @@ img, svg, video {
   font-size: 0.9rem;
 }
 
+/* Review-queue cards (review.html). Each card adopts a question lifted
+ * from its lesson page, so the details inside inherit the .quiz styling;
+ * only the source line is new chrome. */
+.review-card {
+  margin-block: 1.25rem;
+}
+
+.review-source {
+  font-family: system-ui, sans-serif;
+  font-size: 0.8rem;
+  color: var(--muted);
+  margin-bottom: 0.25rem;
+}
+
 /* Form controls. Browsers give inputs and buttons their own little fonts
  * instead of inheriting the page's — 'font: inherit' is the classic one-line
  * fix, and the rest is just making them match the site. */

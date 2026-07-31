@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>JavaScript: The Language Under the Frameworks — The Boring Stack</title>
   <link rel="stylesheet" href="../css/style.css">
+  <script src="../js/srs.js" defer></script>
   <script src="../js/quiz.js" defer></script>
 </head>
 <body>
@@ -76,7 +77,7 @@
       <h2>Closures: the feature this site already runs on</h2>
 <pre><code>questions.forEach((details, index) =&gt; {
   button.addEventListener('click', () =&gt; {
-    progress[keyFor(index)] = { result, ... };
+    srsRecord(progress, keyFor(index), result);
   });
 });</code></pre>
       <p>
@@ -115,7 +116,7 @@
         <code>0</code> and <code>''</code>. The modern operators are
         precise: <code>??</code> falls back only on the two nothings,
         and <code>?.</code> reaches into possibly-absent structures
-        without throwing. <code>quiz.js</code> uses both:
+        without throwing. The site's own scripts use both:
       </p>
 <pre><code>return JSON.parse(localStorage.getItem(STORAGE_KEY)) ?? {};
 const result = progress[keyFor(index)]?.result;</code></pre>

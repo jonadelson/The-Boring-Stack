@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Review — The Boring Stack</title>
+  <link rel="stylesheet" href="css/style.css">
+  <script src="js/srs.js" defer></script>
+  <script src="js/review.js" defer></script>
+</head>
+<body>
+  <article>
+    <header class="site-header">
+      <h1>Review</h1>
+      <p class="tagline">Every question that's due today, from every lesson.</p>
+    </header>
+
+    <main>
+      <p id="review-intro">
+        The review queue needs JavaScript: your progress lives in this
+        browser's localStorage (<a href="lessons/12-localstorage.html">lesson
+        12</a>), and only a script running here can read it. If you're
+        seeing this message, scripts aren't available right now — the
+        <a href="index.html">lessons themselves</a> all work fine without
+        them.
+      </p>
+
+      <section id="review-area" class="quiz" hidden>
+        <h2>Due today</h2>
+        <p id="review-status" class="quiz-tally"></p>
+      </section>
+    </main>
+
+    <nav class="lesson-nav">
+      <a href="index.html">← Home</a>
+      <a href="lessons/14-spaced-repetition.html">How this works →</a>
+    </nav>
+  </article>
+</body>
+</html>

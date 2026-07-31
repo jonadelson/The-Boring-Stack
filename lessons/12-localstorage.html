@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>localStorage: The Smallest Database — The Boring Stack</title>
   <link rel="stylesheet" href="../css/style.css">
+  <script src="../js/srs.js" defer></script>
   <script src="../js/quiz.js" defer></script>
 </head>
 <body>
@@ -106,7 +107,7 @@ localStorage.clear();</code></pre>
 
       <aside class="callout">
         <p><strong>The boring truth:</strong> even a 5&nbsp;MB toy store
-        deserves real data-modeling manners. <code>quiz.js</code> keeps
+        deserves real data-modeling manners. The site's storage code keeps
         everything under one namespaced key
         (<code>boring-stack:quiz</code>) instead of scattering keys it
         can never confidently clean up; it parses defensively, because

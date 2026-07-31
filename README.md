@@ -21,10 +21,11 @@ The site grows in phases. Each new layer of complexity is added only when
 the current stack genuinely hurts — and the moment it hurts is itself the
 lesson about what that layer buys.
 
-1. **Static pages** — HTML and CSS fundamentals. *(current)*
-2. **Interactivity** — quizzes with vanilla JavaScript and localStorage.
+1. **Static pages** — HTML and CSS fundamentals. *(complete)*
+2. **Interactivity** — quizzes, spaced repetition, and a review queue with
+   vanilla JavaScript and localStorage. *(complete)*
 3. **A server and Postgres** — when localStorage's limits (no sync across
-   devices) start to hurt.
+   devices) start to hurt. *(up next)*
 4. **Authentication** — sessions, password hashing, CSRF; security learned
    by building it.
 5. **Operations** — deployment, TLS, logs, backups.

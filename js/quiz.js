@@ -1,28 +1,17 @@
-/* Quiz memory — this site's first JavaScript (phase 2).
+/* Quiz memory — this site's first JavaScript (phase 2), upgraded by the
+ * spaced-repetition finale: grading an answer now also books its next
+ * review via the SM-2 scheduler in srs.js.
  *
  * Progressive enhancement: this file ADDS grading buttons and check marks
  * to the quizzes. Without it, every quiz still works as a plain
  * <details> reveal-the-answer. Nothing in the HTML depends on this script.
  *
- * Lesson 10 walks through this file section by section — read them together.
+ * Lessons 10 and 14 walk through this file and srs.js — read them together.
  */
 
-const STORAGE_KEY = 'boring-stack:quiz';
-
-/* All progress lives under one localStorage key as a JSON object:
- *   { "/lessons/06-forms.html#q2": { result: "right", at: "2026-..." } }
- * localStorage only stores strings, so JSON.parse/stringify at the border. */
-function loadAll() {
-  try {
-    return JSON.parse(localStorage.getItem(STORAGE_KEY)) ?? {};
-  } catch {
-    return {}; // corrupted storage should never break the page
-  }
-}
-
-function saveAll(progress) {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(progress));
-}
+const progress = srsLoad();
+const quiz = document.querySelector('.quiz');
+const questions = quiz ? [...quiz.querySelectorAll('details')] : [];
 
 /* Each question's identity is the page's URL path plus its position.
  * The address bar as database key — lesson 7 said URLs are identifiers,
@@ -31,10 +20,6 @@ function saveAll(progress) {
 function keyFor(index) {
   return `${location.pathname}#q${index}`;
 }
-
-const progress = loadAll();
-const quiz = document.querySelector('.quiz');
-const questions = quiz ? [...quiz.querySelectorAll('details')] : [];
 
 /* The score line under the quiz heading. Created from nothing:
  * it exists in the DOM but you won't find it in view-source. */
@@ -64,8 +49,7 @@ questions.forEach((details, index) => {
     button.type = 'button'; // not inside a form, but a good habit: never submit by accident
     button.textContent = label;
     button.addEventListener('click', () => {
-      progress[keyFor(index)] = { result, at: new Date().toISOString() };
-      saveAll(progress);
+      srsRecord(progress, keyFor(index), result);
       renderQuestion(details, index);
       renderTally();
     });
