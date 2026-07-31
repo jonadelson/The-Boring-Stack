@@ -177,6 +177,37 @@ pre code {
   margin-bottom: 0.5rem;
 }
 
+/* Form controls. Browsers give inputs and buttons their own little fonts
+ * instead of inheriting the page's — 'font: inherit' is the classic one-line
+ * fix, and the rest is just making them match the site. */
+input, button, select, textarea {
+  font: inherit;
+}
+
+input {
+  padding: 0.4em 0.6em;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--bg);
+  color: var(--text);
+  max-width: 100%;
+}
+
+button {
+  padding: 0.4em 1em;
+  border: 1px solid var(--accent);
+  border-radius: 6px;
+  background: var(--accent);
+  color: var(--bg);
+  cursor: pointer;
+}
+
+/* :user-invalid matches only after the user has interacted with the field —
+ * unlike :invalid, which would paint fields red before they've typed. */
+input:user-invalid {
+  border-color: #b3423a;
+}
+
 /* Previous/next links at the bottom of each lesson. Flexbox with
  * justify-content: space-between pushes the two links to opposite edges. */
 .lesson-nav {

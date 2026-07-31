@@ -1,0 +1,185 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Forms: The Most Underrated Element — The Boring Stack</title>
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+  <article>
+    <header class="site-header">
+      <h1>Forms: The Most Underrated Element</h1>
+      <p class="lesson-meta">Lesson 6 · html · ~8 min</p>
+    </header>
+
+    <main>
+      <p>
+        Before JavaScript could do anything useful, the web already had
+        search engines, shopping carts, forums, and webmail. All of it ran
+        on one element: <code>&lt;form&gt;</code>. The form is the original
+        write path of the web — the way a page stops being a document you
+        read and becomes a request you compose. It is also, in modern
+        framework code, the most commonly reimplemented-badly piece of the
+        platform.
+      </p>
+
+      <h2>The anatomy</h2>
+<pre><code>&lt;form action="/search" method="get"&gt;
+  &lt;label for="q"&gt;Search&lt;/label&gt;
+  &lt;input id="q" name="q" type="search"&gt;
+  &lt;button&gt;Go&lt;/button&gt;
+&lt;/form&gt;</code></pre>
+      <p>Three attributes do all the work:</p>
+      <ul>
+        <li><strong><code>action</code></strong> — the URL the request goes
+          to.</li>
+        <li><strong><code>method</code></strong> — <code>get</code> or
+          <code>post</code> (more below).</li>
+        <li><strong><code>name</code></strong> — on each input. This is the
+          one people forget: <em>only named inputs are submitted.</em> The
+          name becomes the key, the value becomes the value. A form is a
+          little key-value editor for building an HTTP request.</li>
+      </ul>
+      <p>
+        And note the <code>&lt;label&gt;</code> with
+        <code>for</code> pointing at the input's <code>id</code>: that link
+        means screen readers announce the field's purpose, and — the part
+        everyone appreciates — tapping the label focuses the input. On a
+        phone, that turns a tiny checkbox into a big target.
+      </p>
+
+      <h2>GET or POST: the question that organizes the web</h2>
+      <p>
+        This is lesson 5's request anatomy put to work.
+        A <strong>GET</strong> form encodes the fields into the URL's query
+        string: <code>/search?q=postgres</code>. The request has no body
+        and no side effects — which is exactly why the result can be
+        bookmarked, shared, cached, and safely retried. Every search
+        results page you've ever linked to someone works because search is
+        a GET form.
+      </p>
+      <p>
+        A <strong>POST</strong> form puts the fields in the request body
+        and means <em>do something</em>: create the account, charge the
+        card, publish the comment. Browsers treat it accordingly — ever
+        seen the "resubmit form?" warning when tapping back? That's the
+        browser protecting you from repeating a side effect. (Servers dodge
+        that dialog with a boring trick called Post/Redirect/Get: answer
+        every successful POST with a redirect, so reloading the result page
+        re-runs a harmless GET. You'll implement it in phase 3.)
+      </p>
+      <p>The rule is one sentence: <strong>reading is GET, changing is
+        POST.</strong> A shocking number of real-world bugs — search pages
+        you can't share, crawlers deleting records by following
+        links — are violations of that sentence.</p>
+
+      <h2>Try it — no server required</h2>
+      <p>
+        This form GETs to this very page. Type something, submit, and watch
+        the URL: your input becomes a query string, the page reloads, and
+        you've composed an HTTP request by hand.
+      </p>
+      <form action="" method="get" class="callout">
+        <label for="demo">Say something:</label>
+        <input id="demo" name="said" type="text" required minlength="3">
+        <button>Submit</button>
+      </form>
+      <p>
+        Try submitting it empty, too. The browser refuses and explains why —
+        that's <code>required</code> and <code>minlength</code> at work,
+        with zero JavaScript.
+      </p>
+
+      <h2>Validation the platform already does</h2>
+      <ul>
+        <li><code>required</code> — must be filled</li>
+        <li><code>type="email"</code>, <code>type="url"</code> — must look
+          like one</li>
+        <li><code>minlength</code>, <code>maxlength</code>,
+          <code>min</code>, <code>max</code> — bounds</li>
+        <li><code>pattern</code> — a regex, for everything else</li>
+      </ul>
+      <p>
+        The browser blocks submission, focuses the offending field, and
+        shows a message in the user's own language. CSS can style invalid
+        fields via the <code>:invalid</code> and
+        <code>:user-invalid</code> selectors. One caveat that phase 4 will
+        drill in: client-side validation is a courtesy to honest users, not
+        a defense — anyone can send any request to your server, so the
+        server must validate everything again.
+      </p>
+
+      <h2>The phone keyboard trick</h2>
+      <p>
+        The <code>type</code> attribute changes which keyboard a phone
+        shows: <code>email</code> surfaces the <code>@</code>,
+        <code>tel</code> shows a dial pad, <code>number</code> shows
+        digits, <code>date</code> opens a native date picker. Combined with
+        <code>autocomplete</code> hints (<code>autocomplete="email"</code>,
+        <code>"name"</code>, <code>"one-time-code"</code>), the browser
+        will fill most forms for the user. This is the cheapest mobile UX
+        improvement in existence, and it's a few characters of HTML.
+      </p>
+
+      <aside class="callout">
+        <p><strong>The boring truth:</strong> a plain HTML form submits on
+        Enter, validates itself, works with every password manager and
+        autofill system, and needs zero code. Framework apps that rebuild
+        forms as controlled components plus onClick handlers routinely lose
+        those behaviors one by one — then reinstall them as libraries.
+        When a form on a React site won't submit on Enter, you're watching
+        this lesson's absence.</p>
+      </aside>
+
+      <h2>Where this goes</h2>
+      <p>
+        Forms are the write path for the rest of the roadmap: in phase 3,
+        a form is how quiz answers reach the server; in phase 4, login is
+        a POST form, and most web security is the discipline of handling
+        form input safely. The element you just met is the surface area
+        of everything that follows.
+      </p>
+
+      <section class="quiz">
+        <h2>Check yourself</h2>
+        <details>
+          <summary>Why does an input without a <code>name</code> attribute
+            do nothing?</summary>
+          <p>Because submission serializes name/value pairs — the
+          <code>name</code> is the key in the request. No name, no key,
+          nothing sent.</p>
+        </details>
+        <details>
+          <summary>Search results, delete-account button: which method for
+            each, and why?</summary>
+          <p>Search is GET — no side effects, so the URL is shareable and
+          safely repeatable. Deleting is POST — it changes things, so it
+          must not live behind a link a crawler or a reload could
+          re-trigger. Reading is GET; changing is POST.</p>
+        </details>
+        <details>
+          <summary>Your form has <code>required</code> and
+            <code>pattern</code> on every field. Is server-side validation
+            still necessary?</summary>
+          <p>Absolutely. Browser validation only constrains people using
+          your form politely — anyone can craft a raw HTTP request with
+          any payload. The server must re-validate everything.</p>
+        </details>
+        <details>
+          <summary>What does <code>type="email"</code> buy you on a
+            phone?</summary>
+          <p>An email-shaped keyboard (with <code>@</code> handy), basic
+          format validation, and — with
+          <code>autocomplete="email"</code> — autofill from the browser.</p>
+        </details>
+      </section>
+    </main>
+
+    <nav class="lesson-nav">
+      <a href="05-http.html">← HTTP</a>
+      <a href="../index.html">Home →</a>
+    </nav>
+  </article>
+</body>
+</html>
