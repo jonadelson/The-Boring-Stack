@@ -185,6 +185,38 @@ img, svg, video {
   margin-bottom: 0.5rem;
 }
 
+/* Quiz memory (phase 2). js/quiz.js stamps data-result attributes; these
+ * rules draw the marks from them. The ::after content lives in CSS, not
+ * HTML, because the marks are presentation of stored state, not document
+ * content. */
+.quiz details[data-result="right"] > summary::after {
+  content: " ✓";
+  color: #3a9e63;
+}
+
+.quiz details[data-result="wrong"] > summary::after {
+  content: " ✗";
+  color: #c4524a;
+}
+
+.quiz-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-family: system-ui, sans-serif;
+  font-size: 0.9rem;
+}
+
+.quiz-controls button {
+  padding: 0.25em 0.75em;
+}
+
+.quiz-tally {
+  color: var(--muted);
+  font-family: system-ui, sans-serif;
+  font-size: 0.9rem;
+}
+
 /* Form controls. Browsers give inputs and buttons their own little fonts
  * instead of inheriting the page's — 'font: inherit' is the classic one-line
  * fix, and the rest is just making them match the site. */

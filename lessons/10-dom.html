@@ -1,0 +1,187 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>The DOM and Events: Your First Sprinkle — The Boring Stack</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <script src="../js/quiz.js" defer></script>
+</head>
+<body>
+  <article>
+    <header class="site-header">
+      <h1>The DOM and Events: Your First Sprinkle</h1>
+      <p class="lesson-meta">Lesson 10 · javascript · ~9 min</p>
+    </header>
+
+    <main>
+      <p>
+        Phase 2 begins, and something changed on this site today: the
+        quizzes remember. Scroll down, reveal an answer, tap "Got it,"
+        and reload the page — the check mark survives. The feature is
+        about sixty lines of vanilla JavaScript in a file called
+        <a href="../js/quiz.js"><code>js/quiz.js</code></a>, and this
+        lesson is a guided tour of it. Open the two side by side if you
+        can; everything below is in that file.
+      </p>
+
+      <h2>The DOM: your page as a live data structure</h2>
+      <p>
+        When the browser reads your HTML, it builds the <strong>Document
+        Object Model</strong> — a tree of objects, one per element, that
+        JavaScript can inspect and change. The crucial word is
+        <em>live</em>: the HTML file is the blueprint, but the DOM is the
+        building, and changing the building doesn't touch the blueprint.
+        That's why "view source" (the file) and the browser dev tools'
+        element inspector (the DOM) can disagree — and after today, on
+        this site, they do: the grading buttons below exist in no HTML
+        file. They're built at load time, out of nothing.
+      </p>
+
+      <h2>Finding things: your CSS knowledge, reused</h2>
+<pre><code>const quiz = document.querySelector('.quiz');
+const questions = quiz.querySelectorAll('details');</code></pre>
+      <p>
+        <code>querySelector</code> takes a CSS selector — the same
+        language you learned for styling — and returns the first match;
+        <code>querySelectorAll</code> returns all of them. This is most
+        of DOM-finding in practice, and it means every selector skill
+        from lesson 3 transfers directly. (There's a subtlety our script
+        steps around: <code>querySelectorAll</code> returns a NodeList,
+        an array-<em>like</em> — spreading it, <code>[...&#8203;]</code>,
+        produces a true array with the full toolkit of
+        <code>filter</code> and friends.)
+      </p>
+
+      <h2>Making things</h2>
+<pre><code>const button = document.createElement('button');
+button.textContent = 'Got it';
+controls.append(button);</code></pre>
+      <p>
+        Create an element, fill it, attach it — the node appears on
+        screen the moment it's appended. Note
+        <code>textContent</code>, not <code>innerHTML</code>: it treats
+        the string as text, never as markup. With our own button labels
+        the difference is invisible, but the habit is load-bearing —
+        <code>innerHTML</code> with data you didn't write is how sites
+        get scripts injected into them, and phase 4 has a whole lesson
+        on that disaster. Default to the boring property.
+      </p>
+
+      <h2>Events: the page talks back</h2>
+<pre><code>button.addEventListener('click', () =&gt; {
+  progress[keyFor(index)] = { result, at: new Date().toISOString() };
+  saveAll(progress);
+  renderQuestion(details, index);
+  renderTally();
+});</code></pre>
+      <p>
+        The DOM is also how the page reports what the user does. Every
+        tap, key, scroll, and submit fires an <strong>event</strong>;
+        <code>addEventListener</code> registers a function to run when
+        one happens. This is the whole interaction model of the web —
+        every framework's <code>onClick</code> is this, one layer down.
+        Our listener does four things, and the order is the lesson:
+        change the data, save the data, then re-render the affected
+        pieces <em>from</em> the data. State first, appearance second —
+        the appearance is always derived. Keep that discipline and
+        sprinkles stay manageable; lose it and you get pages where the
+        screen and the truth drift apart.
+      </p>
+      <p>
+        Notice also the division of labor at the render step: JavaScript
+        only stamps a <code>data-result</code> attribute on the element.
+        The ✓ and ✗ marks are drawn by CSS rules keyed to that attribute.
+        JS owns state, CSS owns appearance — each layer doing the job it's
+        best at.
+      </p>
+
+      <h2>Loading: one attribute, no ceremony</h2>
+<pre><code>&lt;script src="../js/quiz.js" defer&gt;&lt;/script&gt;</code></pre>
+      <p>
+        <code>defer</code> tells the browser: fetch this without blocking,
+        run it after the document is parsed. That guarantee is why the
+        script can touch the quiz without wrapping everything in
+        load-event boilerplate — by the time it runs, the elements exist.
+        This one attribute replaces a folder of build tooling for a site
+        this size.
+      </p>
+
+      <aside class="callout">
+        <p><strong>The boring truth:</strong> you just read the
+        framework-shaped hole. Find elements, create elements, listen,
+        keep state, re-render from state — that loop <em>is</em> what
+        React abstracts, and at sprinkle scale the abstraction costs more
+        than the loop. The skill of the ladder's rung 2 is recognizing
+        which scale you're at. When the re-rendering gets genuinely hairy
+        — many views of the same state, updates cascading — that's rung 4
+        knocking. A quiz tally is not that day.</p>
+      </aside>
+
+      <h2>Where the memory lives (and its two limits)</h2>
+      <p>
+        Persistence comes from <code>localStorage</code> — a tiny
+        key-value store the browser keeps per site, surviving reloads
+        and restarts. It gets its own lesson next, but two limits are
+        worth naming now because we chose them deliberately. It stores
+        only strings (hence the JSON encoding at the borders). And it
+        belongs to <em>this browser on this device</em> — your phone's
+        progress will never appear on your laptop. That second limit is
+        not a bug in our code; it is the wall you must hit before a
+        server is <em>earned</em>. We are now, officially, walking
+        toward the phase 3 pain on purpose.
+      </p>
+
+      <h2>Try it</h2>
+      <p>
+        Grade the quiz below, reload, and watch the marks persist. Then
+        the fun one: open this page in a private/incognito tab — blank
+        slate, because private tabs get their own throwaway storage.
+        If you're at a desktop, the console (F12) will show you
+        <code>localStorage.getItem('boring-stack:quiz')</code> — your
+        answers, sitting there as JSON.
+      </p>
+
+      <section class="quiz">
+        <h2>Check yourself</h2>
+        <details>
+          <summary>Why can "view source" and the dev tools' element
+            inspector show different content?</summary>
+          <p>View source shows the HTML file as delivered; the inspector
+          shows the live DOM, which scripts may have changed since. This
+          page's grading buttons exist only in the second.</p>
+        </details>
+        <details>
+          <summary>Why prefer <code>textContent</code> over
+            <code>innerHTML</code>?</summary>
+          <p><code>textContent</code> treats input as inert text;
+          <code>innerHTML</code> parses it as markup, which turns any
+          not-fully-trusted string into a script-injection risk. Default
+          to text.</p>
+        </details>
+        <details>
+          <summary>In the click listener, why does saving happen before
+            rendering?</summary>
+          <p>The discipline is state-first: change and persist the data,
+          then re-render the display <em>from</em> the data. The screen
+          is always a derivation of stored truth, so they can't drift
+          apart.</p>
+        </details>
+        <details>
+          <summary>What does <code>defer</code> promise, and what
+            boilerplate does it remove?</summary>
+          <p>The script downloads without blocking and runs only after
+          the document is parsed — so the elements it needs are
+          guaranteed to exist, without wrapping code in load-event
+          handlers.</p>
+        </details>
+      </section>
+    </main>
+
+    <nav class="lesson-nav">
+      <a href="09-accessibility.html">← Accessibility</a>
+      <a href="../index.html">Home →</a>
+    </nav>
+  </article>
+</body>
+</html>
