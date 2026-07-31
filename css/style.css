@@ -134,6 +134,14 @@ img, svg, video {
   margin-left: 0.5em;
 }
 
+/* Per-lesson quiz tallies, injected by js/home.js from localStorage. */
+.lesson-progress {
+  font-family: system-ui, sans-serif;
+  font-size: 0.75rem;
+  color: var(--muted);
+  white-space: nowrap;
+}
+
 .site-footer {
   margin-top: 3rem;
   padding-top: 1rem;

@@ -1,0 +1,183 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>localStorage: The Smallest Database — The Boring Stack</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <script src="../js/quiz.js" defer></script>
+</head>
+<body>
+  <article>
+    <header class="site-header">
+      <h1>localStorage: The Smallest Database</h1>
+      <p class="lesson-meta">Lesson 12 · javascript · ~8 min</p>
+    </header>
+
+    <main>
+      <p>
+        Since lesson 10, your quiz answers have been living somewhere.
+        This lesson is about that somewhere — the browser's built-in
+        key-value store — and, along the way, your first meeting with
+        the security boundary the whole web is organized around. There's
+        also a new feature shipped with this lesson:
+        <a href="../index.html">the home page</a> now shows your ✓ and ✗
+        counts next to each lesson. By the end you'll know exactly why
+        that works and what its limits are.
+      </p>
+
+      <h2>The whole API fits in four lines</h2>
+<pre><code>localStorage.setItem('key', 'value');
+localStorage.getItem('key');    // 'value', or null
+localStorage.removeItem('key');
+localStorage.clear();</code></pre>
+      <p>
+        Persistent across reloads, tabs, and restarts. No setup, no
+        permissions dialog, no library. The one quirk: both keys and
+        values are <strong>strings, only strings</strong> — store a
+        number and get back a string; store an object and get back
+        <code>"[object Object]"</code>, a classic rite of passage. Hence
+        the convention <code>quiz.js</code> follows:
+        <code>JSON.stringify</code> on the way in,
+        <code>JSON.parse</code> on the way out, and structured data
+        passes through a string-shaped hole intact.
+      </p>
+
+      <h2>Whose data is it? The origin</h2>
+      <p>
+        Here's the important idea hiding in the small API. Storage is
+        partitioned by <strong>origin</strong> — the trio of scheme,
+        host, and port (<code>https://jonadelson.github.io</code>). Every
+        page on the same origin shares one store; pages on any other
+        origin can't touch it, full stop. That's why the home page can
+        read what eleven lesson pages wrote — same origin, same store —
+        and why no other website can read your quiz scores or write fake
+        ones.
+      </p>
+      <p>
+        Meet this boundary properly, because you'll see it everywhere
+        from here on: the <strong>same-origin policy</strong> is the
+        load-bearing wall of browser security. Cookies, fetch requests,
+        iframe isolation — phase 4 is substantially about what the
+        origin boundary protects and the attacks that try to reach
+        across it. Storage is just its friendliest face.
+      </p>
+
+      <h2>A cache, not a ledger</h2>
+      <p>
+        localStorage's limits are worth knowing precisely, because two
+        of them are why phase 3 exists:
+      </p>
+      <ul>
+        <li><strong>~5&nbsp;MB per origin</strong> — plenty for
+          preferences and progress, wrong for real datasets.</li>
+        <li><strong>Synchronous</strong> — reads and writes block the
+          one thread (lesson 11). Immaterial at our size; a reason the
+          big-data alternative exists.</li>
+        <li><strong>Erasable</strong> — "clear browsing data" wipes it,
+          private tabs get a throwaway copy, and a browser under storage
+          pressure may evict it. It is a <em>convenience cache</em>, and
+          honest engineering treats it that way: nothing irreplaceable
+          goes in.</li>
+        <li><strong>Device-bound</strong> — the limit we keep meeting.
+          Your phone and your laptop have never heard of each other.
+          There is no code fix on this rung of the ladder; syncing
+          requires a shared home for the data, and a shared home is a
+          server. The phase 3 itch is now fully itching.</li>
+      </ul>
+
+      <h2>The neighbors, and when to knock</h2>
+      <ul>
+        <li><strong><code>sessionStorage</code></strong> — same API,
+          per-tab, gone when the tab closes. For "state of this visit,"
+          like a half-finished wizard.</li>
+        <li><strong>Cookies</strong> — the elder mechanism, and mostly
+          <em>not</em> a client-side store: cookies ride along on every
+          HTTP request to the server. That's pure waste for data only
+          the page needs — but exactly the point when the <em>server</em>
+          needs it on every request, which is how sessions work and why
+          cookies carry the web's logins. Phase 4 territory.</li>
+        <li><strong>IndexedDB</strong> — the browser's big database:
+          asynchronous, transactional, gigabyte-scale, and notoriously
+          ceremonious. The boring rule: it exists for when localStorage
+          genuinely hurts. A quiz tracker isn't that day; don't climb
+          before the rung runs out.</li>
+      </ul>
+
+      <aside class="callout">
+        <p><strong>The boring truth:</strong> even a 5&nbsp;MB toy store
+        deserves real data-modeling manners. <code>quiz.js</code> keeps
+        everything under one namespaced key
+        (<code>boring-stack:quiz</code>) instead of scattering keys it
+        can never confidently clean up; it parses defensively, because
+        storage is user-editable and survives old versions of your code;
+        and its keys carry an admitted flaw — they embed lesson URLs, so
+        phase 3's URL redesign will force our first-ever <em>data
+        migration</em>. Schema decisions have consequences at every
+        scale. That's not a localStorage lesson; that's the Postgres
+        lessons, rehearsed small.</p>
+      </aside>
+
+      <h2>Try it</h2>
+      <p>
+        Grade a question below, then visit
+        <a href="../index.html">the home page</a> — this lesson's row
+        now carries your counts, read from the store this page just
+        wrote. For the full picture on a desktop: dev tools →
+        Application (or Storage) tab → Local Storage → this origin, and
+        there's your JSON, editable by hand. Edit it — make yourself a
+        liar with twenty ✓s — and reload the home page. Client-side
+        data is <em>yours</em>, not the site's, which is one more
+        reason servers never trust what clients report. Phase 4 will
+        say that louder.
+      </p>
+
+      <section class="quiz">
+        <h2>Check yourself</h2>
+        <details>
+          <summary>Why does storing an object directly in localStorage
+            fail, and what's the convention?</summary>
+          <p>Keys and values are strings only — an object becomes
+          <code>"[object Object]"</code>. The convention is JSON at the
+          borders: stringify going in, parse coming out.</p>
+        </details>
+        <details>
+          <summary>What exactly is an origin, and what does it
+            partition?</summary>
+          <p>The scheme + host + port trio. It's the boundary of the
+          browser's security model — storage, cookie access, and
+          request rules are all partitioned by it. Same origin shares;
+          cross-origin is walled off.</p>
+        </details>
+        <details>
+          <summary>Why is "cache, not ledger" the right posture for
+            localStorage?</summary>
+          <p>Because it's erasable (user clearing, private tabs,
+          eviction) and device-bound. Convenience data belongs there;
+          anything irreplaceable needs a durable home — a server.</p>
+        </details>
+        <details>
+          <summary>Cookies also store data — why are they the wrong tool
+            for the quiz scores, and the right one for logins?</summary>
+          <p>Cookies travel to the server on every request. For
+          client-only data that's pure waste; for sessions it's the
+          entire mechanism — the server needs the identifier every
+          time.</p>
+        </details>
+        <details>
+          <summary>You just edited your own quiz scores in dev tools.
+            What's the general principle?</summary>
+          <p>Everything client-side belongs to the user — storage,
+          JavaScript state, the DOM. Sites must treat client-reported
+          data as claims, not facts; servers re-validate.</p>
+        </details>
+      </section>
+    </main>
+
+    <nav class="lesson-nav">
+      <a href="11-javascript.html">← The language</a>
+      <a href="../index.html">Home →</a>
+    </nav>
+  </article>
+</body>
+</html>
