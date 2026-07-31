@@ -1,0 +1,154 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>URLs Are User Interface — The Boring Stack</title>
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+  <article>
+    <header class="site-header">
+      <h1>URLs Are User Interface</h1>
+      <p class="lesson-meta">Lesson 7 · http · ~7 min</p>
+    </header>
+
+    <main>
+      <p>
+        The URL is the most successful interface element ever shipped. It
+        works in a text message, an email, a sticky note, a QR code, a
+        podcast ad read aloud. It's the only part of your app that appears
+        in every screenshot. And it's the web's original superpower — the
+        thing native apps still can't really do: hand anyone, on any
+        device, a small string that opens exactly the right screen. This
+        lesson is about treating that string as a designed surface instead
+        of an accident.
+      </p>
+
+      <h2>The two parts lesson 5 skipped</h2>
+<pre><code>/search?q=postgres&amp;sort=new#results
+└──┬──┘└────────┬─────────┘└───┬──┘
+ path        query          fragment</code></pre>
+      <ul>
+        <li>The <strong>query string</strong> — key-value pairs after the
+          <code>?</code>. You met it in the forms lesson: it's where GET
+          forms put their fields.</li>
+        <li>The <strong>fragment</strong> — everything after
+          <code>#</code>. It never reaches the server; the browser uses it
+          to scroll to the element with that <code>id</code>. Add
+          <code>id="pricing"</code> to a heading and
+          <code>/about#pricing</code> deep-links straight to it, for
+          free.</li>
+      </ul>
+
+      <h2>Good URLs are readable, guessable, and hackable</h2>
+      <p>Compare:</p>
+<pre><code>/lessons/06-forms.html
+/index.php?page_id=2847&amp;ref=nav&amp;sess=8f3a2c</code></pre>
+      <p>
+        The first tells you what you'll get before you tap. It's
+        <em>guessable</em> — you could type <code>/lessons/</code> and
+        expect something sensible — and <em>hackable</em> in the good
+        sense: trim it to <code>/lessons/05-http.html</code> or up to the
+        site root and you land somewhere reasonable. The conventions that
+        produce URLs like it are boring and simple: lowercase, hyphens
+        between words, nouns organized in a hierarchy, and no
+        implementation details. That <code>.php</code> in the second
+        example is the server's private business leaking into a public,
+        permanent interface — the moment you switch languages, every
+        bookmark breaks.
+      </p>
+
+      <aside class="callout">
+        <p><strong>The boring truth:</strong> in 1998 Tim Berners-Lee wrote
+        an essay titled
+        <a href="https://www.w3.org/Provider/Style/URI">"Cool URIs don't
+        change."</a> A URL is a promise: people bookmark it, cite it, link
+        it from places you'll never find. Design URLs you can honor for a
+        decade — and when you must move something, answer the old URL with
+        a <code>301</code> redirect (lesson 5's "go elsewhere" family)
+        rather than a <code>404</code>. Breaking links is losing data that
+        other people were storing for you.</p>
+      </aside>
+
+      <h2>The URL is a state manager</h2>
+      <p>
+        Here's the idea that connects this lesson to the React one. A URL
+        with a query string — <code>/search?q=postgres&amp;sort=new</code> —
+        <em>is</em> application state, stored in the most boring database
+        available: the address bar. Put state there and a pile of features
+        appear without code: refresh keeps your place, the back button is
+        undo, bookmarking saves the view, and sharing sends your exact
+        screen to someone else's phone.
+      </p>
+      <p>
+        Now you can name a familiar SPA bug precisely: filters set, three
+        tabs deep, refresh — everything gone, because the state lived in
+        JavaScript variables and the URL still said <code>/dashboard</code>.
+        The app broke its half of the URL bargain. Whatever rung of the
+        ladder you're on, the discipline holds: <strong>if a user could
+        want to share, bookmark, or refresh into a view, that view belongs
+        in the URL.</strong>
+      </p>
+
+      <h2>Designing this site's URLs</h2>
+      <p>
+        Even this small site made URL decisions, and one of them is
+        already regrettable — instructively so. The numbered filenames
+        (<code>06-forms.html</code>) encode <em>ordering</em> into the
+        <em>address</em>. If a new lesson ever belongs between HTTP and
+        forms, the choice is renumbering (breaking every existing link —
+        see the callout above) or living with misordered numbers. State
+        leaked into an identifier: the exact mistake from the state-design
+        arc, in filename form. A wiser scheme was available all along:
+        <code>/lessons/forms/</code> — stable name, ordering left to the
+        index page, and the <code>.html</code> extension gone too. When
+        the phase 3 server arrives and routing becomes code we control,
+        migrating to that scheme — with <code>301</code>s from the old
+        URLs — will make a perfect worked example.
+      </p>
+
+      <section class="quiz">
+        <h2>Check yourself</h2>
+        <details>
+          <summary>What's the difference between the query string and the
+            fragment?</summary>
+          <p>The query string (<code>?key=value</code>) is sent to the
+          server as part of the request. The fragment
+          (<code>#section</code>) never leaves the browser — it scrolls
+          the page to the element with that <code>id</code>.</p>
+        </details>
+        <details>
+          <summary>You're restructuring a site and moving pages. What do
+            the old URLs owe their bookmarkers?</summary>
+          <p>A <code>301</code> permanent redirect to the new location.
+          Cool URIs don't change — and when they must, they forward their
+          mail instead of returning <code>404</code>.</p>
+        </details>
+        <details>
+          <summary>A dashboard loses all its filter settings on refresh.
+            Diagnose it in this lesson's terms.</summary>
+          <p>View state that users would want to refresh, share, or
+          bookmark was kept in JavaScript variables instead of the URL.
+          The fix is putting the filters in the query string, making the
+          address bar the state manager.</p>
+        </details>
+        <details>
+          <summary>What's wrong with numbered lesson filenames like
+            <code>06-forms.html</code>?</summary>
+          <p>They encode ordering into a permanent identifier. Inserting a
+          lesson means either renumbering (breaking published links) or
+          accepting wrong numbers — ordering belongs in the index, and
+          stable names like <code>/lessons/forms/</code> belong in the
+          URL.</p>
+        </details>
+      </section>
+    </main>
+
+    <nav class="lesson-nav">
+      <a href="06-forms.html">← Forms</a>
+      <a href="../index.html">Home →</a>
+    </nav>
+  </article>
+</body>
+</html>
