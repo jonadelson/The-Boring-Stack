@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Progressive Enhancement: Build Down, Then Up — The Boring Stack</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <script src="../js/quiz.js" defer></script>
+</head>
+<body>
+  <article>
+    <header class="site-header">
+      <h1>Progressive Enhancement: Build Down, Then Up</h1>
+      <p class="lesson-meta">Lesson 13 · architecture · ~8 min</p>
+    </header>
+
+    <main>
+      <p>
+        This site has now shipped JavaScript twice — quiz grading in
+        lesson 10, home-page badges in lesson 12 — and both times the
+        same sentence appeared: <em>without the script, everything still
+        works.</em> That wasn't caution; it was a method with a name.
+        <strong>Progressive enhancement</strong> is the practice of
+        building a complete experience out of the sturdy layers first —
+        HTML that works, CSS that presents it — and then adding
+        JavaScript as an improvement on top, never as a requirement
+        underneath. This lesson makes the method explicit, because from
+        phase 3 on it becomes our architecture.
+      </p>
+
+      <h2>The argument is reliability, not ideology</h2>
+      <p>
+        The case for progressive enhancement is often misheard as
+        concern for people who "turn off JavaScript" — a tiny audience,
+        easily dismissed. The real argument is statistical:
+        <strong>everyone is a no-JavaScript user occasionally.</strong>
+        Scripts fail to arrive on flaky trains and hotel wifi; a CDN
+        blip 404s a bundle; an ad blocker or corporate proxy eats a
+        file; one uncaught error halts everything after it; an older
+        browser chokes on new syntax. HTML has none of these failure
+        modes — it renders as it streams, tolerates errors (lesson 2),
+        and either arrives or the page doesn't load at all. When the
+        page's <em>function</em> lives in the HTML layer, every one of
+        those failures downgrades your site from "nicer" to "fine."
+        When it lives in the JavaScript layer, they downgrade it to a
+        blank screen.
+      </p>
+
+      <h2>The site as case study</h2>
+      <ul>
+        <li><strong>The quizzes.</strong> The baseline is
+          <code>&lt;details&gt;</code> — reveal-the-answer works with
+          every script on earth broken. <code>quiz.js</code>
+          <em>injects</em> the grading buttons, so the no-JS page
+          contains no dead controls: nothing to grey out, nothing to
+          apologize for. The enhancement carries its own UI in with
+          it.</li>
+        <li><strong>The home badges.</strong> Pure addition — read
+          storage, annotate the list. Script absent: a clean lesson
+          list, and nothing whatsoever is missing except a nicety.</li>
+        <li><strong>The demo form (lesson 6).</strong> Validation,
+          submission, keyboard behavior: all native. There was never a
+          script to lose.</li>
+      </ul>
+
+      <h2>The method, as a checklist</h2>
+      <ol>
+        <li><strong>Spend HTML first.</strong> Ask what the platform
+          already provides — <code>&lt;details&gt;</code>,
+          <code>&lt;form&gt;</code>, <code>&lt;dialog&gt;</code>, a
+          link. The native element is the baseline <em>and</em> the
+          accessibility work, prepaid (lesson 9).</li>
+        <li><strong>Make the baseline complete, not a stub.</strong>
+          The no-JS version must genuinely do the job, just less
+          smoothly. A disabled button waiting for hydration is not a
+          baseline; it's a ransom note.</li>
+        <li><strong>Enhance by addition.</strong> Scripts inject their
+          own controls and intercept native behaviors (a form's submit,
+          a link's navigation) rather than replacing the elements. If
+          the script dies mid-way, the native behavior is still
+          underneath, like a net.</li>
+        <li><strong>Treat JavaScript as a guest, not a host.</strong>
+          Feature-detect before using the fancy API; parse storage
+          defensively (<code>quiz.js</code>'s try/catch); fail silent
+          back to the working baseline, never loud into a broken
+          page.</li>
+      </ol>
+
+      <h2>Where the discipline bends — and where it doesn't</h2>
+      <p>
+        Up the ladder, the baseline thins honestly: rung 3's
+        HTML-over-the-wire keeps full-page navigation as its fallback
+        almost for free, while a rung 4–5 tool — a canvas editor, a
+        collaborative board — has no meaningful no-JS version, and
+        pretending otherwise is theater. The discipline doesn't demand
+        one. It demands that the <em>boundary</em> be drawn tightly:
+        the island may require JavaScript; the page around it — the
+        login, the docs, the settings, the billing (lesson 4's "80%
+        edges") — still doesn't get to. Progressive enhancement is less
+        a rule about scripts than a rule about honesty: never let the
+        optional layer take the essential layer hostage.
+      </p>
+
+      <aside class="callout">
+        <p><strong>The boring truth:</strong> the modern framework
+        world spent a decade rediscovering this lesson at enormous
+        cost. Server-side rendering, hydration, "islands
+        architecture," React Server Components, the newer frameworks'
+        love affair with plain <code>&lt;form&gt;</code> submissions —
+        each is progressive enhancement being reinvented <em>inside</em>
+        the tooling that abandoned it, with a build pipeline attached.
+        The architecture phase 3 gives us — server-rendered pages,
+        sprinkles on top — is where that industry-wide U-turn is
+        heading. We'll simply start there.</p>
+      </aside>
+
+      <section class="quiz">
+        <h2>Check yourself</h2>
+        <details>
+          <summary>Why is "nobody disables JavaScript anymore" not a
+            rebuttal of progressive enhancement?</summary>
+          <p>Because disabling was never the point: scripts fail
+          circumstantially for everyone — flaky networks, CDN errors,
+          proxies and blockers, one uncaught exception. The argument is
+          reliability under partial failure, not sympathy for a
+          setting.</p>
+        </details>
+        <details>
+          <summary>Why does <code>quiz.js</code> inject its buttons
+            instead of having them wait in the HTML?</summary>
+          <p>So the baseline page contains no dead controls. If the
+          script never runs, nothing broken is visible — the
+          enhancement brings its own UI and takes it away with it.</p>
+        </details>
+        <details>
+          <summary>What makes a no-JS baseline a "stub" rather than
+            complete, and why does it matter?</summary>
+          <p>A stub renders but can't do the job — a disabled button
+          awaiting hydration. It matters because the whole guarantee
+          rests on the baseline being functional: that's what every
+          failure mode falls back onto.</p>
+        </details>
+        <details>
+          <summary>How does the discipline apply to a genuinely
+            JavaScript-dependent tool like a canvas editor?</summary>
+          <p>The tool itself is exempt — no meaningful no-JS version
+          exists. The discipline instead polices the boundary: the
+          pages around the island (login, settings, docs) stay
+          enhancement-based rather than inheriting the island's
+          requirement.</p>
+        </details>
+      </section>
+    </main>
+
+    <nav class="lesson-nav">
+      <a href="12-localstorage.html">← localStorage</a>
+      <a href="../index.html">Home →</a>
+    </nav>
+  </article>
+</body>
+</html>
