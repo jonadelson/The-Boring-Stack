@@ -8,7 +8,10 @@ the technology that provides it.
 
 ## Viewing it
 
-Every page is a plain HTML file — open `index.html` in any browser.
+Every page is a plain HTML file — open `index.html` in any browser, or run
+the site's own server (no dependencies, phase 3):
+
+    node server/server.js    # → http://localhost:3000
 
 To read it on your phone, enable GitHub Pages: repository **Settings →
 Pages → Deploy from a branch**, pick the default branch and the `/ (root)`

@@ -1,0 +1,193 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>A Web Server From Nothing — The Boring Stack</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <script src="../js/srs.js" defer></script>
+  <script src="../js/quiz.js" defer></script>
+</head>
+<body>
+  <article>
+    <header class="site-header">
+      <h1>A Web Server From Nothing</h1>
+      <p class="lesson-meta">Lesson 15 · server · ~10 min</p>
+    </header>
+
+    <main>
+      <p>
+        Phase 3 opens by puncturing a myth. "Web server" sounds like
+        infrastructure — racks, daemons, other people's job. Here is the
+        truth: a web server is a program that listens on a port, reads
+        the four lines of text you met in lesson 5, and writes some text
+        back. The repository now contains one —
+        <code>server/server.js</code>, about forty lines of code, zero
+        dependencies — and this lesson walks through it. If you have
+        Node installed, <code>node server/server.js</code> serves this
+        entire site from your own machine.
+      </p>
+
+      <h2>The whole shape of it</h2>
+<pre><code>import { createServer } from 'node:http';
+
+const server = createServer(async (request, response) =&gt; {
+  /* runs once per request */
+});
+
+server.listen(3000);</code></pre>
+      <p>
+        That's a complete web server. <code>listen(3000)</code> claims a
+        <strong>port</strong> — one of the numbered doors every machine
+        has; the request handler runs for each arriving request, given
+        two objects that are lesson 5 made tangible:
+        <code>request</code> (the method, path, and headers the browser
+        sent) and <code>response</code> (your side of the conversation —
+        set a status, set headers, write a body, done). There is no
+        magic underneath to find. This <em>is</em> the underneath.
+      </p>
+      <p>
+        While it runs, the site lives at
+        <code>http://localhost:3000</code> — and <code>localhost</code>
+        just means "this machine, asking itself." Your phone can't see
+        it; nobody can. Turning a program on your laptop into a name the
+        whole internet can reach is a genuinely separate skill — DNS,
+        deployment, TLS — and it's phase 5's opening act. For now the
+        public site stays on GitHub Pages while the server grows up in
+        private.
+      </p>
+
+      <h2>Serving files: what GitHub Pages actually is</h2>
+      <p>
+        Our handler maps the URL path onto a file under the site root,
+        reads it, and sends it with the right <code>Content-Type</code> —
+        the header you've been <em>receiving</em> since lesson 5, now
+        written from the other side of the wire. Miss a file and the
+        server decides what a 404 is. That's the entire secret of static
+        hosting: GitHub Pages, nginx serving files, a CDN edge node —
+        at heart, this same dozen lines with decades of hardening. Which
+        reframes the last two phases: all along, "the server" was just a
+        file-reading loop someone else ran. Now it's ours — and a
+        program we own can do what a file-reader can't: <em>accept</em>
+        data, remember it, and answer differently per person. That's the
+        rest of phase 3.
+      </p>
+
+      <h2>The first attack arrives immediately</h2>
+      <p>
+        The moment you map URLs to files, you've created the oldest
+        vulnerability on the web. What does your file-reading loop do
+        with this?
+      </p>
+<pre><code>GET /../../../../etc/passwd</code></pre>
+      <p>
+        Resolve that path naively and it walks <em>up and out</em> of
+        your site root, and the server cheerfully reads any file on the
+        machine — <strong>directory traversal</strong>. The fix is in
+        the source: resolve the path fully, then refuse anything that
+        lands outside the root.
+      </p>
+      <p>
+        Testing it produced this lesson's best surprise. The obvious
+        attack bounced before our guard ever ran — Node's URL parser
+        resolves <code>..</code> segments (even percent-encoded ones)
+        during parsing. So is the guard dead code? No: a sneakier
+        variant hides the slashes themselves as <code>%2F</code>,
+        survives parsing intact, and becomes real path steps only on a
+        later decode — and <em>there</em> the guard catches it, 403.
+        Two independent layers, each covering the other's blind spot.
+        Security people call it <strong>defense in depth</strong>, and
+        the deeper posture behind it is phase 4's founding attitude,
+        worth stating now: <em>requests are not your friends.</em>
+        Every byte of every request is chosen by a stranger; a server
+        that trusts its inputs is a server briefly.
+      </p>
+
+      <h2>The access log</h2>
+<pre><code>2026-07-31T18:20:11.402Z 200 GET /index.html
+2026-07-31T18:20:11.532Z 200 GET /css/style.css
+2026-07-31T18:20:14.104Z 404 GET /nope.html</code></pre>
+      <p>
+        One <code>console.log</code> per request — timestamp, status,
+        method, path. It looks like nothing; it's the ancestor of the
+        entire observability industry, and the first thing you'll read
+        when something breaks. Phase 5 treats logs properly; every
+        server we write from here on keeps this habit from birth.
+      </p>
+
+      <h2>Two housekeeping notes</h2>
+      <p>
+        The repository gained a <code>package.json</code> — five lines,
+        no dependencies. Its one meaningful entry is
+        <code>"type": "module"</code>, which lets Node use the modern
+        <code>import</code> syntax. And note what installing this
+        project looks like: <code>git clone</code>, <code>node
+        server/server.js</code>, done. No <code>npm install</code>, no
+        <code>node_modules</code>. Dependencies are debts; we'll take
+        them on when they buy something (a Postgres driver will be
+        worth it), and each one will be a decision, not a reflex.
+      </p>
+
+      <aside class="callout">
+        <p><strong>The boring truth:</strong> a web framework is this
+        file, grown up. Express and its kin are, at core: this request
+        loop, plus a routing table (match method + path to a handler),
+        plus middleware (functions that run before handlers), plus the
+        file-serving we just wrote. All genuinely useful — and all
+        things we'll now add <em>ourselves, as the need arrives</em>,
+        so that if you ever adopt the framework, you'll know exactly
+        which chores it's doing for you and roughly what they cost.</p>
+      </aside>
+
+      <section class="quiz">
+        <h2>Check yourself</h2>
+        <details>
+          <summary>What is a web server, stripped of mystique?</summary>
+          <p>A program listening on a port that reads an HTTP request —
+          method, path, headers, maybe a body — and writes back a
+          status, headers, and a body. Everything else is elaboration
+          on that loop.</p>
+        </details>
+        <details>
+          <summary>What does <code>localhost:3000</code> mean, and why
+            can't your phone open it?</summary>
+          <p><code>localhost</code> is the machine talking to itself,
+          and 3000 is the port the server claimed. Nothing outside the
+          machine can reach it — making a local program publicly
+          reachable requires deployment, DNS, and TLS (phase 5).</p>
+        </details>
+        <details>
+          <summary>What is directory traversal, and what's the
+            defense?</summary>
+          <p>A request path with <code>..</code> segments that resolves
+          outside the site root, tricking a file-serving server into
+          reading arbitrary machine files. Defense: fully resolve the
+          requested path, then refuse anything that lands outside the
+          root.</p>
+        </details>
+        <details>
+          <summary>Our guard never fires for a plain
+            <code>/../../etc/passwd</code> — why keep it?</summary>
+          <p>The URL parser neutralizes the obvious form, but an
+          encoded-slash variant (<code>%2F</code>) survives parsing and
+          becomes path steps on a later decode — the guard catches that
+          one. Two layers covering each other's blind spots: defense in
+          depth.</p>
+        </details>
+        <details>
+          <summary>What can a server we own do that a static file host
+            can't?</summary>
+          <p>Accept and remember data (POST), and answer differently
+          per request and per person — the abilities that make sync,
+          accounts, and everything else in phases 3–4 possible.</p>
+        </details>
+      </section>
+    </main>
+
+    <nav class="lesson-nav">
+      <a href="14-spaced-repetition.html">← Spaced repetition</a>
+      <a href="../index.html">Home →</a>
+    </nav>
+  </article>
+</body>
+</html>
