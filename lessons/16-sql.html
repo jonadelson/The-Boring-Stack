@@ -1,0 +1,222 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>SQL From Zero — The Boring Stack</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <script src="../js/srs.js" defer></script>
+  <script src="../js/quiz.js" defer></script>
+</head>
+<body>
+  <article>
+    <header class="site-header">
+      <h1>SQL From Zero</h1>
+      <p class="lesson-meta">Lesson 16 · postgres · ~10 min</p>
+    </header>
+
+    <main>
+      <p>
+        SQL was designed in 1974. Postgres began at Berkeley in 1986.
+        Both predate the web itself, and both will outlive every
+        technology in your current job listing — SQL is the oldest
+        still-dominant language in software, and learning it is the
+        single best effort-to-longevity trade this roadmap offers.
+        Every query below was really executed in Postgres 16; the repo
+        carries the whole tour as
+        <code>server/db/sql-from-zero.sql</code>, runnable end to end.
+        The domain is this site's own future: questions and their
+        reviews, the data our spaced-repetition engine will keep in
+        Postgres once sync arrives.
+      </p>
+
+      <h2>A table is a contract</h2>
+<pre><code>CREATE TABLE reviews (
+  id          integer GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+  question_id integer NOT NULL REFERENCES questions (id),
+  result      text NOT NULL CHECK (result IN ('right', 'wrong')),
+  reviewed_at timestamptz NOT NULL,
+  next_due    date NOT NULL
+);</code></pre>
+      <p>
+        Compare this to localStorage, which stored whatever string we
+        handed it. A table declares the shape of every row — and the
+        database <em>enforces</em> the declaration. Each line is a
+        promise: <code>NOT NULL</code> (this field always exists),
+        <code>REFERENCES questions (id)</code> (every review points at
+        a question that's really there), <code>CHECK</code> (only these
+        two values, ever), <code>PRIMARY KEY</code> with a
+        database-generated id (every row addressable, no two alike).
+        The types matter too — <code>timestamptz</code> is "a moment
+        in time, timezone-aware," a whole class of bugs prevented by a
+        column type.
+      </p>
+
+      <h2>Asking questions: SELECT</h2>
+      <p>
+        SQL is <strong>declarative</strong>: you describe the answer
+        you want, and the database decides how to get it — a genuine
+        contrast with the <code>filter</code>/<code>map</code> loops we
+        hand-wrote in JavaScript. Columns are chosen by
+        <code>SELECT</code>, rows by <code>WHERE</code>:
+      </p>
+<pre><code>SELECT prompt, lesson FROM questions WHERE lesson = 'http';
+
+                     prompt                     | lesson
+------------------------------------------------+--------
+ What does it mean that HTTP is stateless?      | http
+ What is the difference between HTTP and HTTPS? | http
+(2 rows)</code></pre>
+      <p>Sorting and limiting compose on the end — the newest three
+        reviews:</p>
+<pre><code>SELECT question_id, result, reviewed_at
+FROM reviews ORDER BY reviewed_at DESC LIMIT 3;
+
+ question_id | result |      reviewed_at
+-------------+--------+------------------------
+           4 | right  | 2026-07-30 08:01:00+00
+           2 | wrong  | 2026-07-30 07:55:00+00
+           3 | right  | 2026-07-28 21:03:00+00
+(3 rows)</code></pre>
+      <p>And <code>GROUP BY</code> collapses rows into facts
+        <em>about</em> rows:</p>
+<pre><code>SELECT result, count(*) FROM reviews GROUP BY result;
+
+ result | count
+--------+-------
+ wrong  |     2
+ right  |     4
+(2 rows)</code></pre>
+
+      <h2>The join: why rows hold IDs, not copies</h2>
+      <p>
+        Notice that reviews store <code>question_id</code>, never the
+        question's text. One copy of each fact, referenced everywhere
+        it's needed — the same don't-duplicate discipline this site
+        keeps preaching, formalized as <em>normalization</em>. The
+        <code>JOIN</code> is what reunites the pieces: here, everything
+        due on or before August 1st, with prompts attached:
+      </p>
+<pre><code>SELECT q.prompt, r.next_due
+FROM reviews AS r
+JOIN questions AS q ON q.id = r.question_id
+WHERE r.next_due &lt;= '2026-08-01'
+ORDER BY r.next_due;
+
+                     prompt                     |  next_due
+------------------------------------------------+------------
+ What does it mean that HTTP is stateless?      | 2026-07-26
+ What is the difference between HTTP and HTTPS? | 2026-07-26
+ Why does an unnamed input submit nothing?      | 2026-07-29
+ What is the difference between HTTP and HTTPS? | 2026-07-30
+ What does it mean that HTTP is stateless?      | 2026-08-01
+(5 rows)</code></pre>
+      <p>
+        Read the <code>ON</code> clause as the seam: for each review,
+        find the question whose id matches, and staple the rows
+        together. And look closely at the result, because it's subtly
+        <em>wrong</em> for our purposes: questions appear once per
+        review, not once with their <em>latest</em> due date — question
+        1's August 1st row should supersede its July 26th one. The
+        query did what we said, not what we meant. Saying what we mean
+        takes schema thinking, and that's the next lesson.
+      </p>
+
+      <h2>Constraints earn their keep by saying no</h2>
+      <p>Both of these inserts were really attempted. The database's
+        answers are the feature:</p>
+<pre><code>INSERT INTO reviews (question_id, result, reviewed_at, next_due)
+  VALUES (99, 'right', now(), '2026-08-02');
+
+ERROR:  insert or update on table "reviews" violates foreign key
+        constraint "reviews_question_id_fkey"
+DETAIL: Key (question_id)=(99) is not present in table "questions".
+
+INSERT INTO reviews (question_id, result, reviewed_at, next_due)
+  VALUES (1, 'maybe', now(), '2026-08-02');
+
+ERROR:  new row for relation "reviews" violates check constraint
+        "reviews_result_check"
+DETAIL: Failing row contains (8, 1, maybe, ..., 2026-08-02).</code></pre>
+      <p>
+        No review of a nonexistent question, no result outside the
+        contract — <em>ever</em>, no matter which buggy code or hurried
+        human tries. In localStorage, both of these would have saved
+        silently and detonated later. The boring principle:
+        <strong>push your invariants into the layer that cannot be
+        bypassed.</strong> Application code asks nicely; the database
+        enforces.
+      </p>
+
+      <aside class="callout">
+        <p><strong>The boring truth:</strong> the industry has spent
+        twenty years announcing SQL's replacement — object databases,
+        XML databases, the NoSQL wave — and every round ended the same
+        way: the challengers grew SQL layers, and Postgres absorbed
+        the challengers' best tricks (JSON columns, full-text search,
+        and counting). A fifty-year-old language keeps winning because
+        the relational model matched how data actually behaves. Learn
+        it once; bill it forever.</p>
+      </aside>
+
+      <h2>Run it yourself</h2>
+      <p>
+        With Postgres installed:
+        <code>createdb boringstack</code>, then
+        <code>psql -d boringstack -f server/db/sql-from-zero.sql</code>.
+        The file ends with the two failing inserts commented out — run
+        them by hand and read the refusals. <code>psql</code> itself is
+        a boring gem: fifty years of interface refinement disguised as
+        a plain prompt.
+      </p>
+
+      <section class="quiz">
+        <h2>Check yourself</h2>
+        <details>
+          <summary>What does it mean that SQL is declarative?</summary>
+          <p>You state the result you want — which columns, which rows,
+          how grouped — and the database chooses the procedure. The
+          JavaScript equivalent was hand-written loops; SQL hands the
+          "how" to a planner with fifty years of tricks.</p>
+        </details>
+        <details>
+          <summary>Why do reviews store <code>question_id</code> instead
+            of the question text?</summary>
+          <p>Normalization: one authoritative copy of each fact,
+          referenced by id everywhere else. Copies drift; references
+          can't. JOINs reunite the pieces at query time.</p>
+        </details>
+        <details>
+          <summary>What did the foreign key and CHECK constraints each
+            refuse, and why is the refusal the feature?</summary>
+          <p>The FK refused a review of a nonexistent question; CHECK
+          refused a result outside right/wrong. Refusal at the database
+          layer means no code path, buggy or hostile, can store invalid
+          data — invariants live where they can't be bypassed.</p>
+        </details>
+        <details>
+          <summary>Our "what's due" JOIN returned five rows but was
+            subtly wrong. How?</summary>
+          <p>It listed every review on or before the cutoff, so
+          questions appeared once per review instead of once with
+          their latest schedule. The query answered what we said, not
+          what we meant — the gap schema design closes.</p>
+        </details>
+        <details>
+          <summary>What's the argument that SQL is the best
+            effort-to-longevity trade on this roadmap?</summary>
+          <p>Designed in 1974, still the dominant data language, with
+          every replacement wave ending in the challengers adding SQL
+          back. Skills learned once keep paying for decades — the
+          boring-technology bet in its purest form.</p>
+        </details>
+      </section>
+    </main>
+
+    <nav class="lesson-nav">
+      <a href="15-http-server.html">← A server from nothing</a>
+      <a href="../index.html">Home →</a>
+    </nav>
+  </article>
+</body>
+</html>
